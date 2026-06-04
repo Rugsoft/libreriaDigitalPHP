@@ -1,4 +1,4 @@
-let = libros = []
+let = libros = [];
 
 const inputTitulo = document.getElementById("titulo");
 const inputAutor = document.getElementById("autor");
@@ -13,12 +13,12 @@ btnAñadir.addEventListener("click", añadirLibro);
 
 function añadirLibro() {
 
-    let titulo = inputTitulo.value;
-    let autor = inputAutor.value;
-    let genero = inputGenero.value;
+    let titulo = inputTitulo.value.trim();
+    let autor = inputAutor.value.trim();
+    let genero = inputGenero.value.trim();
 
     if(titulo === "" || autor === "" || genero === ""){
-        alert("Revisa los datos del libro");
+        alert("Por favor, rellene todos los campos antes de añadir el libro.");
         return;
     }
 
@@ -50,18 +50,31 @@ function mostrarLibros(){
 
         const fila = document.createElement("tr");
 
-        fila.innerHTML = `
-            <td>${libro.titulo}</td>
-            <td>${libro.autor}</td>
-            <td>${libro.genero}</td>
-            <td>
-                <button onclick="eliminarProducto(${indice})">
-                    Eliminar
-                </button>
-            </td>
-            `
+         // Creamos cada celda y aplicamos .textContent para evitar inyecciones XSS
+        const tdTitulo = document.createElement("td");
+        tdTitulo.textContent = libro.titulo;
+        const tdAutor = document.createElement("td");
+        tdAutor.textContent = libro.autor;
+        const tdGenero = document.createElement("td");
+        tdGenero.textContent = libro.genero;
+        const tdAcciones = document.createElement("td");
+        const botonEliminar = document.createElement("button");
+        botonEliminar.textContent = "Eliminar";
+
+        // Manejador de eventos dinámico y seguro
+        botonEliminar.addEventListener("click", () => eliminarLibro(indice));
+        tdAcciones.appendChild(botonEliminar);
+
+        // Añadimos celdas a la fila
+        fila.appendChild(tdTitulo);
+        fila.appendChild(tdAutor);
+        fila.appendChild(tdGenero);
+        fila.appendChild(tdAcciones);
+
+        // Añadimos la fila a la tabla
         tablaLibros.appendChild(fila);
     });
+
     actualizarRegistro();
 }
 
@@ -71,7 +84,7 @@ function actualizarRegistro() {
 
 }
 
-function eliminarProducto(indice) {
+function eliminarLibro(indice) {
 
     libros.splice(indice, 1);
     mostrarLibros();
@@ -79,17 +92,28 @@ function eliminarProducto(indice) {
 }
 
 function guardarLibrosLocalStorage() {
-    localStorage.setItem("libros", JSON.stringify(libros));
+
+    try{
+        localStorage.setItem("libros", JSON.stringify(libros));
+    }catch(error){
+        window.alert("No se puedo guardar en localStorage", error);
+    }
+    
 }
 
 function cargarLibrosLocalStorage() {
-    const librosLocalStorage = localStorage.getItem("libros");
-    if (librosLocalStorage) {
-        libros = JSON.parse(librosLocalStorage);
+    
+    try {
+
+        const librosLocalStorage = localStorage.getItem("libros");
+        if (librosLocalStorage) {
+            libros = JSON.parse(librosLocalStorage);
+        }
+    } catch (error) {
+        window.alert("No se pudo cargar de localStorage", error);
+        libros = [];
     }
 }
 
 cargarLibrosLocalStorage();
-
 mostrarLibros();
-actualizarRegistro();
