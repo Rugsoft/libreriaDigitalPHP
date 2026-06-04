@@ -53,6 +53,11 @@ function mostrarLibros(){
             <td>${libro.titulo}</td>
             <td>${libro.autor}</td>
             <td>${libro.genero}</td>
+            <td>
+                <button onclick="eliminarProducto(${indice})">
+                    Eliminar
+                </button>
+            </td>
             `
         tablaLibros.appendChild(fila);
     });
@@ -64,3 +69,12 @@ function actualizarRegistro() {
     numeroRegistros.textContent = "Total libros: " + libros.length;
 
 }
+
+function eliminarProducto(indice) {
+
+    libros.splice(indice, 1);
+    mostrarLibros();
+}
+
+mostrarLibros();
+actualizarRegistro();
