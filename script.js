@@ -82,5 +82,14 @@ function guardarLibrosLocalStorage() {
     localStorage.setItem("libros", JSON.stringify(libros));
 }
 
+function cargarLibrosLocalStorage() {
+    const librosLocalStorage = localStorage.getItem("libros");
+    if (librosLocalStorage) {
+        libros = JSON.parse(librosLocalStorage);
+    }
+}
+
+cargarLibrosLocalStorage();
+
 mostrarLibros();
 actualizarRegistro();
