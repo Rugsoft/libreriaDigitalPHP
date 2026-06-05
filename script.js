@@ -5,14 +5,23 @@ let indiceModificacion = null;
 const inputTitulo = document.getElementById("titulo");
 const inputAutor = document.getElementById("autor");
 const inputGenero = document.getElementById("genero");
+const inputBuscar = document.getElementById("buscar");
 
 const numeroRegistros = document.querySelector(".contenedor__listado-registros");
 const registroDisponibles = document.getElementById("registrosDisponibles");
 const tablaLibros = document.getElementById("tablaLibros");
 
 const btnAñadir = document.getElementById("btnAñadir");
+const btnMostrar = document.getElementById("btnMostrar");
+const btnDisponibles = document.getElementById("btnDisponibles");
+const btnBuscar = document.getElementById("btnBuscar");
+
 
 btnAñadir.addEventListener("click", añadirLibro);
+btnMostrar.addEventListener("click", () => mostrarLibros(libros));
+btnDisponibles.addEventListener("click", mostrarDisponibles);
+btnBuscar.addEventListener("click", buscarLibro);
+
 
 function añadirLibro() {
 
@@ -48,7 +57,7 @@ function añadirLibro() {
     }
 
     limpiarFormulario();
-    mostrarLibros();
+    mostrarLibros(libros);
     guardarLibrosLocalStorage();
 }
 
@@ -59,11 +68,11 @@ function limpiarFormulario() {
     inputTitulo.focus();
 }
 
-function mostrarLibros(){
+function mostrarLibros(datosLibros = libros){
 
     tablaLibros.innerHTML = "";
 
-    libros.forEach((libro, indice) => {
+    datosLibros.forEach((libro, indice) => {
 
         const fila = document.createElement("tr");
 
@@ -92,11 +101,11 @@ function mostrarLibros(){
 
 
         // Manejador de eventos dinámico y seguro
-        botonEliminar.addEventListener("click", () => eliminarLibro(indice));
+        botonEliminar.addEventListener("click", () => eliminarLibro(libro.titulo));
         contenedorBotones.appendChild(botonEliminar);
-        botonModificar.addEventListener("click", () => modificarLibro(indice));
+        botonModificar.addEventListener("click", () => modificarLibro(libro.titulo));
         contenedorBotones.appendChild(botonModificar);
-        botonPrestar.addEventListener("click", () => prestamoLibro(indice));
+        botonPrestar.addEventListener("click", () => prestamoLibro(libro.titulo));
         contenedorBotones.appendChild(botonPrestar);
         tdAcciones.appendChild(contenedorBotones);
 
@@ -123,19 +132,39 @@ function actualizarRegistro() {
 
 }
 
-function eliminarLibro(indice) {
+function mostrarDisponibles() {
+
+    const librosDisponibles = libros.filter(libro => libro.isDisponible);
+
+    if (librosDisponibles.length === 0) {
+        window.alert("No hay libros disponibles");
+        return;
+    }
+    mostrarLibros(librosDisponibles);
+}
+
+function eliminarLibro(titulo) {
 
     const confirmar = confirm("¿Seguro que quieres eliminar el libro?");
 
     if (confirmar) {
-        libros.splice(indice, 1);
-        mostrarLibros();
-        guardarLibrosLocalStorage();
-    }
-    
+        const indice = libros.findIndex(libro => libro.titulo === titulo);
+        if (indice !== -1) {
+
+            libros.splice(indice, 1);
+            mostrarLibros();
+            guardarLibrosLocalStorage();
+        }
+    } 
 }
 
-function modificarLibro(indice) {
+function modificarLibro(titulo) {
+
+    const indice = libros.findIndex(libro => libro.titulo === titulo);
+
+    if (indice === -1) {
+        return;
+    }
 
     inputTitulo.value = libros[indice].titulo;
     inputAutor.value = libros[indice].autor;
@@ -150,16 +179,39 @@ function modificarLibro(indice) {
 
 }
 
-function prestamoLibro(indice) {
+function prestamoLibro(titulo) {
 
-    if (libros[indice].isDisponible) {
+    const indice = libros.findIndex(libro => libro.titulo === titulo);
+
+    if (indice !== -1) {
+        libros[indice].isDisponible = !libros[indice].isDisponible;
+    }
+    /*if (libros[indice].isDisponible) {
         libros[indice].isDisponible = false;
     } else {
         libros[indice].isDisponible = true;
-    }
-
+    }*/
+   
     mostrarLibros();
     guardarLibrosLocalStorage();
+}
+
+function buscarLibro() {
+
+    let buscar = inputBuscar.value.trim();
+
+    if (buscar === "") {
+        mostrarLibros();
+        return;
+    }
+
+    const librosFiltrados = libros.filter(libro => 
+            libro.titulo.toLowerCase().includes(buscar.toLowerCase()) ||
+            libro.autor.toLowerCase().includes(buscar.toLowerCase()) ||
+            libro.genero.toLowerCase().includes(buscar.toLowerCase())
+    );
+
+    mostrarLibros(librosFiltrados);
 }
 
 function guardarLibrosLocalStorage() {

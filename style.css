@@ -283,6 +283,74 @@ body {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
+.contenedor__botones {
+
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.contenedor__botones input[type="text"] {
+
+    flex: 1;
+    min-width: 200px;
+    padding: 0.8rem 1rem;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    color: var(--text-cream);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.contenedor__botones input[type="text"]:focus {
+
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 10px rgba(197, 168, 128, 0.15);
+}
+
+
+.contenedor__botones button {
+
+    padding: 0.8rem 1.5rem;
+    background-color: transparent;
+    color: var(--accent-gold);
+    border: 1px solid var(--border-gold);
+    border-radius: 3px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.contenedor__botones button:hover {
+
+    border-color: var(--accent-gold);
+    background-color: rgba(197, 168, 128, 0.05);
+    box-shadow: 0 0 10px rgba(197, 168, 128, 0.1);
+}
+
+
+.contenedor__botones button.contenedor__botones-buscar {
+
+    border-color: var(--accent-gold);
+    background-color: transparent;
+}
+
+.contenedor__botones button.contenedor__botones-buscar:hover {
+
+    background-color: var(--accent-gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px rgba(197, 168, 128, 0.25);
+}
+
 .contenedor__listado-tabla button.boton-prestar {
 
     background-color: rgba(16, 185, 129, 0.1);
