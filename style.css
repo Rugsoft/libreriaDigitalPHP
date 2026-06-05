@@ -44,6 +44,18 @@ body {
         grid-template-columns: 1fr 1.6fr;
         align-items: start;
     }
+    .contenedor__añadir {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    .contenedor__listado {
+        grid-column: 2;
+        grid-row: 2 / 4;
+    }
+    .contenedor__manejo-datos {
+        grid-column: 1;
+        grid-row: 3;
+    }
 }
 
 .contenedor__cabeza {
@@ -73,10 +85,10 @@ body {
     font-weight: 300;
 }
 
-.contenedor__añadir, .contenedor__listado {
+.contenedor__añadir, .contenedor__listado, .contenedor__manejo-datos {
 
     background-color: var(--bg-card);
-    border: 1 px solid var(--border-gold);
+    border: 1px solid var(--border-gold);
     border-radius: 4px;
     padding: 2.5rem 2rem;
     position: relative;
@@ -84,7 +96,8 @@ body {
 }
 
 .contenedor__añadir::before,
-.contenedor__listado::before {
+.contenedor__listado::before,
+.contenedor__manejo-datos::before {
 
     content: '';
     position: absolute;
@@ -363,4 +376,50 @@ body {
     background-color: #10b981;
     color: #0a0d0c;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+
+.contenedor__manejo-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.contenedor__manejo-datos-titulo {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+}
+
+.contenedor__manejo-datos-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.contenedor__manejo-datos button {
+    flex: 1;
+    min-width: 150px;
+    padding: 0.9rem 1.5rem;
+    background-color: transparent;
+    color: var(--accent-gold);
+    border: 1px solid var(--accent-gold);
+    border-radius: 3px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.contenedor__manejo-datos button:hover {
+    background-color: var(--accent-gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px rgba(197, 168, 128, 0.25);
 }

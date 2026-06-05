@@ -1,5 +1,6 @@
 let libros = [];
 let indiceModificacion = null;
+let tablaDisponible = false;
 
 
 const inputTitulo = document.getElementById("titulo");
@@ -135,6 +136,7 @@ function actualizarRegistro() {
 function mostrarDisponibles() {
 
     const librosDisponibles = libros.filter(libro => libro.isDisponible);
+    tablaDisponible = true;
 
     if (librosDisponibles.length === 0) {
         window.alert("No hay libros disponibles");
@@ -185,10 +187,14 @@ function prestamoLibro(titulo) {
 
     if (indice !== -1) {
         libros[indice].isDisponible = !libros[indice].isDisponible;
+        if (tablaDisponible) {
+            mostrarDisponibles();
+            tablaDisponible = false;
+        } else {
+            mostrarLibros();
+        }
+        guardarLibrosLocalStorage();
     }
-   
-    mostrarLibros();
-    guardarLibrosLocalStorage();
 }
 
 function buscarLibro() {
