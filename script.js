@@ -62,7 +62,8 @@ function mostrarLibros(){
         tdDisponibilidad.textContent = libro.isDisponible ? "Disponible" : "Prestado";
 
         const tdAcciones = document.createElement("td");
-        tdAcciones.classList.add("contenedor__listado-acciones");
+        const contenedorBotones = document.createElement("div");
+        contenedorBotones.classList.add("contenedor__listado-acciones");
         const botonEliminar = document.createElement("button");
         botonEliminar.textContent = "Eliminar";
         botonEliminar.classList.add("boton-eliminar");
@@ -76,11 +77,13 @@ function mostrarLibros(){
 
         // Manejador de eventos dinámico y seguro
         botonEliminar.addEventListener("click", () => eliminarLibro(indice));
-        tdAcciones.appendChild(botonEliminar);
+        contenedorBotones.appendChild(botonEliminar);
         botonModificar.addEventListener("click", () => modificarLibro(indice));
-        tdAcciones.appendChild(botonModificar);
+        contenedorBotones.appendChild(botonModificar);
         botonPrestar.addEventListener("click", () => prestamoLibro(indice));
-        tdAcciones.appendChild(botonPrestar);
+        contenedorBotones.appendChild(botonPrestar);
+        tdAcciones.appendChild(contenedorBotones);
+
 
 
         // Añadimos celdas a la fila

@@ -198,14 +198,14 @@ body {
 .contenedor__listado-tabla {
 
     width: 100%;
-    border-collapse: collapse;
+    border-collapse:collapse;
 }
 
 .contenedor__listado-tabla th,
 .contenedor__listado-tabla td {
 
     padding: 1.1rem 0.8rem;
-    text-align: left;
+    text-align: center;
 }
 
 .contenedor__listado-tabla th {
@@ -291,7 +291,7 @@ body {
 }
 
 .contenedor__listado-tabla button.boton-prestar:hover {
-    
+
     background-color: #10b981;
     color: #0a0d0c;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
