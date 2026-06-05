@@ -123,9 +123,14 @@ function actualizarRegistro() {
 
 function eliminarLibro(indice) {
 
-    libros.splice(indice, 1);
-    mostrarLibros();
-    guardarLibrosLocalStorage();
+    const confirmar = confirm("¿Seguro que quieres eliminar el libro?");
+
+    if (confirmar) {
+        libros.splice(indice, 1);
+        mostrarLibros();
+        guardarLibrosLocalStorage();
+    }
+    
 }
 
 function modificarLibro(indice) {
