@@ -4,6 +4,8 @@
 let libros = [];
 let isbnModificacion = null; // Almacena el ISBN del libro que se está editando
 
+const tituloInput = document.querySelector(".contenedor__añadir-titulo");
+
 // Referencias a los elementos del DOM de entrada y formulario
 const inputTitulo = document.getElementById("titulo");
 const inputAutor = document.getElementById("autor");
@@ -111,6 +113,7 @@ function limpiarFormulario() {
     btnAñadir.textContent = "Añadir libro";
     isbnModificacion = null;
     btnCancelar.classList.add("oculto");
+    tituloInput.textContent = "Añadir Libros a la Colección";
 }
 
 /**
@@ -267,6 +270,7 @@ function modificarLibro(isbn) {
 
     btnAñadir.textContent = "Guardar Cambios";
     btnCancelar.classList.remove("oculto");
+    tituloInput.textContent = "Editar Libro";
     inputTitulo.focus();
 }
 
