@@ -203,7 +203,7 @@ function modificarLibro(titulo) {
 
     indiceModificacion = indice;
 
-    btnAñadir.textContent = "Guardas Cambios";
+    btnAñadir.textContent = "Guardar Cambios";
 
     //eliminarLibro(indice);
     inputTitulo.focus();
@@ -269,7 +269,7 @@ function guardarLibrosLocalStorage() {
     try{
         localStorage.setItem("libros", JSON.stringify(libros));
     }catch(error){
-        window.alert("No se puedo guardar en localStorage", error);
+        window.alert("No se pudo guardar en localStorage", error);
     }
     
 }
