@@ -69,10 +69,12 @@
             </table>
 
             <div class="contenedor__botones">
-                <button class="contenedor__botones-mostrar" id="btnMostrar">Mostrar libros</button>
-                <button class="contenedor__botones-disponibles" id="btnDisponibles">Libros Disponibles</button>
+                <select name="estadoLibros" id="estadoLibros">
+                    <option value="todos">Todos</option>
+                    <option value="disponibles">Disponibles</option>
+                    <option value="noDisponibles">No disponibles</option>
+                </select>
                 <input type="text" id="buscar" placeholder="Título/autor o género">
-                <button class="contenedor__botones-buscar" id="btnBuscar">Buscar</button>
             </div>
 
         </section>

@@ -18,25 +18,15 @@ const tablaLibros = document.getElementById("tablaLibros");
 
 const btnAñadir = document.getElementById("btnAñadir");
 const formularioAñadir = document.getElementById("formularioAñadir");
-const btnMostrar = document.getElementById("btnMostrar");
-const btnDisponibles = document.getElementById("btnDisponibles");
-const btnBuscar = document.getElementById("btnBuscar");
+const estadoLibros = document.getElementById("estadoLibros");
 const btnImportar = document.getElementById("btnImportar");
 const btnExportar = document.getElementById("btnExportar");
 
 
 
 formularioAñadir.addEventListener("submit", añadirLibro);
-btnMostrar.addEventListener("click", () => {
-
-    tablaDisponible = false;
-    tablaFiltrados = false;
-    mostrarLibros(libros);
-    actualizarRegistro();
-});
-
-btnDisponibles.addEventListener("click", mostrarDisponibles);
-btnBuscar.addEventListener("click", buscarLibro);
+estadoLibros.addEventListener("change", mostrarLibros);
+inputBuscar.addEventListener("input", mostrarLibros);
 btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
 

@@ -305,6 +305,29 @@ body {
     align-items: center;
 }
 
+.contenedor__botones select {
+    padding: 0.8rem 1rem;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    color: var(--text-cream);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+}
+
+.contenedor__botones select:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 10px rgba(197, 168, 128, 0.15);
+}
+
+.contenedor__botones select option {
+    background-color: var(--bg-card);
+    color: var(--text-cream);
+}
+
 .contenedor__botones input[type="text"] {
 
     flex: 1;
