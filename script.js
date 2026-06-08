@@ -18,6 +18,7 @@ const tablaLibros = document.getElementById("tablaLibros");
 
 // Referencias a los botones y elementos de control
 const btnAñadir = document.getElementById("btnAñadir");
+const btnCancelar = document.getElementById("btnCancelar");
 const formularioAñadir = document.getElementById("formularioAñadir");
 const estadoLibros = document.getElementById("estadoLibros");
 const btnImportar = document.getElementById("btnImportar");
@@ -25,6 +26,7 @@ const btnExportar = document.getElementById("btnExportar");
 
 // Registro de manejadores de eventos
 formularioAñadir.addEventListener("submit", añadirLibro);
+btnCancelar.addEventListener("click", limpiarFormulario);
 estadoLibros.addEventListener("change", filtrarYMostrarLibros); // Filtrado instantáneo al cambiar el selector
 inputBuscar.addEventListener("input", filtrarYMostrarLibros); // Filtrado reactivo en tiempo real al escribir
 btnImportar.addEventListener("click", importarLibros);
@@ -106,6 +108,9 @@ function limpiarFormulario() {
     inputGenero.value = "";
     inputIsbn.value = "";
     inputTitulo.focus();
+    btnAñadir.textContent = "Añadir libro";
+    isbnModificacion = null;
+    btnCancelar.classList.add("oculto");
 }
 
 /**
@@ -261,6 +266,7 @@ function modificarLibro(isbn) {
     isbnModificacion = isbn;
 
     btnAñadir.textContent = "Guardar Cambios";
+    btnCancelar.classList.remove("oculto");
     inputTitulo.focus();
 }
 
