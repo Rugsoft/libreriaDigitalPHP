@@ -4,6 +4,7 @@
 let libros = [];
 let isbnModificacion = null; // Almacena el ISBN del libro que se está editando
 let isbnParaEliminar = null; // Almacena el ISBN del libro que se desea eliminar mediante el modal
+let portadaBase64 = ""; // Almacena la imagen de portada comprimida en base64
 
 const tituloInput = document.querySelector(".contenedor__añadir-titulo");
 
@@ -13,6 +14,13 @@ const inputAutor = document.getElementById("autor");
 const inputGenero = document.getElementById("genero");
 const inputIsbn = document.getElementById("ISBN");
 const inputBuscar = document.getElementById("buscar");
+const inputPortada = document.getElementById("portada");
+
+// Referencias a los elementos de vista previa de portada
+const previewContainer = document.getElementById("portadaPreviewContainer");
+const previewImg = document.getElementById("portadaPreview");
+const btnEliminarPortada = document.getElementById("btnEliminarPortada");
+const labelPortada = document.getElementById("portadaLabel");
 
 // Referencias a los elementos de visualización de datos y contadores
 const numeroRegistros = document.getElementById("totalLibros");
@@ -35,6 +43,8 @@ estadoLibros.addEventListener("change", filtrarYMostrarLibros); // Filtrado inst
 inputBuscar.addEventListener("input", filtrarYMostrarLibros); // Filtrado reactivo en tiempo real al escribir
 btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
+inputPortada.addEventListener("change", procesarImagenPortada);
+btnEliminarPortada.addEventListener("click", eliminarPortadaSeleccionada);
 
 // Registro de eventos para el Modal de Confirmación
 document.getElementById("modalBtnCancelar").addEventListener("click", cerrarModalEliminar);
@@ -148,7 +158,8 @@ function añadirLibro(event) {
                 genero,
                 isbn,
                 isDisponible: libros[indice].isDisponible,
-                alquiladoCount: libros[indice].alquiladoCount || 0
+                alquiladoCount: libros[indice].alquiladoCount || 0,
+                portada: portadaBase64
             };
             mostrarToast(`"${titulo}" se ha actualizado correctamente.`, "success");
         }
@@ -170,7 +181,8 @@ function añadirLibro(event) {
             genero,
             isbn,
             isDisponible: true,
-            alquiladoCount: 0
+            alquiladoCount: 0,
+            portada: portadaBase64
         };
         libros.push(nuevoLibro);
         mostrarToast(`"${titulo}" se ha añadido correctamente a la colección.`, "success");
@@ -189,6 +201,11 @@ function limpiarFormulario() {
     inputAutor.value = "";
     inputGenero.value = "";
     inputIsbn.value = "";
+    inputPortada.value = "";
+    portadaBase64 = "";
+    previewImg.src = "";
+    previewContainer.classList.add("oculto");
+    labelPortada.classList.remove("oculto");
     inputTitulo.focus();
     btnAñadir.innerHTML = "<span>Añadir libro</span>";
     isbnModificacion = null;
@@ -242,7 +259,7 @@ function mostrarLibros(datosLibros = libros) {
         // Mostrar Empty State elegante si no hay resultados
         const filaVacia = document.createElement("tr");
         const celdaVacia = document.createElement("td");
-        celdaVacia.setAttribute("colspan", "6");
+        celdaVacia.setAttribute("colspan", "7");
         
         celdaVacia.innerHTML = `
             <div class="empty-state">
@@ -265,6 +282,25 @@ function mostrarLibros(datosLibros = libros) {
         // Celda del ISBN
         const tdIsbn = document.createElement("td");
         tdIsbn.textContent = libro.isbn || "—";
+
+        // Celda de Portada
+        const tdPortada = document.createElement("td");
+        if (libro.portada) {
+            const imgPortada = document.createElement("img");
+            imgPortada.src = libro.portada;
+            imgPortada.classList.add("tabla-portada");
+            imgPortada.alt = `Portada de ${libro.titulo}`;
+            tdPortada.appendChild(imgPortada);
+        } else {
+            const divPlaceholder = document.createElement("div");
+            divPlaceholder.classList.add("tabla-portada-placeholder");
+            divPlaceholder.innerHTML = `
+                <svg class="placeholder-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                </svg>
+            `;
+            tdPortada.appendChild(divPlaceholder);
+        }
 
         // Celda del Título
         const tdTitulo = document.createElement("td");
@@ -336,6 +372,7 @@ function mostrarLibros(datosLibros = libros) {
 
         // Añadir todas las celdas a la fila
         fila.appendChild(tdIsbn);
+        fila.appendChild(tdPortada);
         fila.appendChild(tdTitulo);
         fila.appendChild(tdAutor);
         fila.appendChild(tdGenero);
@@ -397,6 +434,19 @@ function modificarLibro(isbn) {
     inputAutor.value = libros[indice].autor;
     inputGenero.value = libros[indice].genero;
     inputIsbn.value = libros[indice].isbn || "";
+
+    // Cargar la portada si existe
+    if (libros[indice].portada) {
+        portadaBase64 = libros[indice].portada;
+        previewImg.src = portadaBase64;
+        previewContainer.classList.remove("oculto");
+        labelPortada.classList.add("oculto");
+    } else {
+        portadaBase64 = "";
+        previewImg.src = "";
+        previewContainer.classList.add("oculto");
+        labelPortada.classList.remove("oculto");
+    }
 
     // Guardar el ISBN actual para poder rastrear el libro original si se cambia su ISBN
     isbnModificacion = isbn;
@@ -577,6 +627,78 @@ function actualizarTopLibros() {
 
         topListaContenedor.appendChild(item);
     });
+}
+
+/**
+ * Procesa la imagen de portada seleccionada por el usuario, redimensionándola
+ * y comprimiéndola mediante un canvas a formato JPEG Base64 de tamaño óptimo.
+ * @param {Event} event - Evento de cambio del input file.
+ */
+function procesarImagenPortada(event) {
+    const archivo = event.target.files[0];
+    if (!archivo) return;
+
+    // Validar tipo de archivo
+    if (!archivo.type.startsWith("image/")) {
+        mostrarToast("Por favor, seleccione un archivo de imagen válido.", "error");
+        inputPortada.value = "";
+        return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // Dimensiones objetivo para la portada (miniatura premium)
+            const anchoMax = 120;
+            const altoMax = 180;
+            
+            let ancho = img.width;
+            let alto = img.height;
+            
+            // Mantener la relación de aspecto
+            if (ancho > alto) {
+                if (ancho > anchoMax) {
+                    alto = Math.round((alto * anchoMax) / ancho);
+                    ancho = anchoMax;
+                }
+            } else {
+                if (alto > altoMax) {
+                    ancho = Math.round((ancho * altoMax) / alto);
+                    alto = altoMax;
+                }
+            }
+
+            // Crear un canvas invisible para redimensionar y comprimir
+            const canvas = document.createElement("canvas");
+            canvas.width = ancho;
+            canvas.height = alto;
+            
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, ancho, alto);
+            
+            // Obtener la imagen comprimida en JPEG (calidad 70% para ahorrar mucho espacio)
+            portadaBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            
+            // Actualizar vista previa
+            previewImg.src = portadaBase64;
+            previewContainer.classList.remove("oculto");
+            labelPortada.classList.add("oculto");
+        };
+        img.src = e.target.result;
+    };
+    lector.readAsDataURL(archivo);
+}
+
+/**
+ * Elimina la portada seleccionada del formulario actual.
+ */
+function eliminarPortadaSeleccionada() {
+    inputPortada.value = "";
+    portadaBase64 = "";
+    previewImg.src = "";
+    previewContainer.classList.add("oculto");
+    labelPortada.classList.remove("oculto");
 }
 
 // Inicialización de la aplicación al cargar la página
