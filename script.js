@@ -22,6 +22,10 @@ const previewImg = document.getElementById("portadaPreview");
 const btnEliminarPortada = document.getElementById("btnEliminarPortada");
 const labelPortada = document.getElementById("portadaLabel");
 
+// Referencias a los elementos de la previsualización flotante hover
+const hoverPreview = document.getElementById("portadaHoverPreview");
+const hoverPreviewImg = document.getElementById("portadaHoverPreviewImg");
+
 // Referencias a los elementos de visualización de datos y contadores
 const numeroRegistros = document.getElementById("totalLibros");
 const registroDisponibles = document.getElementById("registrosDisponibles");
@@ -45,6 +49,11 @@ btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
 inputPortada.addEventListener("change", procesarImagenPortada);
 btnEliminarPortada.addEventListener("click", eliminarPortadaSeleccionada);
+
+// Registro de eventos para previsualización flotante al hacer hover
+tablaLibros.addEventListener("mouseover", mostrarHoverPortada);
+tablaLibros.addEventListener("mousemove", moverHoverPortada);
+tablaLibros.addEventListener("mouseout", ocultarHoverPortada);
 
 // Registro de eventos para el Modal de Confirmación
 document.getElementById("modalBtnCancelar").addEventListener("click", cerrarModalEliminar);
@@ -699,6 +708,60 @@ function eliminarPortadaSeleccionada() {
     previewImg.src = "";
     previewContainer.classList.add("oculto");
     labelPortada.classList.remove("oculto");
+}
+
+/**
+ * Muestra la vista previa flotante de la portada al pasar el ratón por encima.
+ * @param {MouseEvent} event - Evento mouseover de la tabla.
+ */
+function mostrarHoverPortada(event) {
+    const targetImg = event.target.closest(".tabla-portada");
+    if (targetImg) {
+        hoverPreviewImg.src = targetImg.src;
+        hoverPreview.classList.add("mostrar");
+    }
+}
+
+/**
+ * Desplaza la vista previa flotante de la portada siguiendo el movimiento del cursor.
+ * Incluye lógica de colisiones de pantalla para evitar que se desborde del viewport.
+ * @param {MouseEvent} event - Evento mousemove de la tabla.
+ */
+function moverHoverPortada(event) {
+    const targetImg = event.target.closest(".tabla-portada");
+    if (targetImg && hoverPreview.classList.contains("mostrar")) {
+        const offset = 15; // Distancia del cursor
+        let x = event.clientX + offset;
+        let y = event.clientY + offset;
+
+        const previewAncho = 160;
+        const previewAlto = 240;
+
+        // Comprobación de límites horizontales
+        if (x + previewAncho > window.innerWidth) {
+            x = event.clientX - previewAncho - offset;
+        }
+
+        // Comprobación de límites verticales
+        if (y + previewAlto > window.innerHeight) {
+            y = event.clientY - previewAlto - offset;
+        }
+
+        hoverPreview.style.left = `${x}px`;
+        hoverPreview.style.top = `${y}px`;
+    }
+}
+
+/**
+ * Oculta la vista previa flotante cuando el ratón sale de la portada.
+ * @param {MouseEvent} event - Evento mouseout de la tabla.
+ */
+function ocultarHoverPortada(event) {
+    const targetImg = event.target.closest(".tabla-portada");
+    if (targetImg) {
+        hoverPreview.classList.remove("mostrar");
+        hoverPreviewImg.src = "";
+    }
 }
 
 // Inicialización de la aplicación al cargar la página
