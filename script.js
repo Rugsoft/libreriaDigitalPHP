@@ -147,7 +147,8 @@ function añadirLibro(event) {
                 autor,
                 genero,
                 isbn,
-                isDisponible: libros[indice].isDisponible
+                isDisponible: libros[indice].isDisponible,
+                alquiladoCount: libros[indice].alquiladoCount || 0
             };
             mostrarToast(`"${titulo}" se ha actualizado correctamente.`, "success");
         }
@@ -168,7 +169,8 @@ function añadirLibro(event) {
             autor,
             genero,
             isbn,
-            isDisponible: true
+            isDisponible: true,
+            alquiladoCount: 0
         };
         libros.push(nuevoLibro);
         mostrarToast(`"${titulo}" se ha añadido correctamente a la colección.`, "success");
@@ -355,6 +357,7 @@ function actualizarRegistro() {
     const disponibles = libros.filter(libro => libro.isDisponible).length;
     registroDisponibles.textContent = disponibles;
     registroNoDisponibles.textContent = libros.length - disponibles;
+    actualizarTopLibros();
 }
 
 /**
@@ -414,6 +417,9 @@ function prestamoLibro(isbn) {
     if (indice !== -1) {
         const libro = libros[indice];
         libro.isDisponible = !libro.isDisponible;
+        if (!libro.isDisponible) {
+            libro.alquiladoCount = (libro.alquiladoCount || 0) + 1;
+        }
         guardarLibrosLocalStorage();
         filtrarYMostrarLibros();
         const mensaje = libro.isDisponible ? 
@@ -447,6 +453,9 @@ function cargarLibrosLocalStorage() {
             libros = cargados.map((libro, index) => {
                 if (!libro.isbn) {
                     libro.isbn = `MIG-${Date.now()}-${index}`;
+                }
+                if (libro.alquiladoCount === undefined) {
+                    libro.alquiladoCount = 0;
                 }
                 return libro;
             });
@@ -502,6 +511,9 @@ function importarLibros() {
                             if (!libro.isbn) {
                                 libro.isbn = `IMP-${Date.now()}-${index}`;
                             }
+                            if (libro.alquiladoCount === undefined) {
+                                libro.alquiladoCount = 0;
+                            }
                             return libro;
                         });
                         guardarLibrosLocalStorage();
@@ -517,6 +529,53 @@ function importarLibros() {
             };
             lector.readAsText(archivo);
         }
+    });
+}
+
+/**
+ * Actualiza y renderiza la sección del Top 3 de libros más prestados.
+ */
+function actualizarTopLibros() {
+    const topListaContenedor = document.getElementById("topLibrosLista");
+    if (!topListaContenedor) return;
+
+    topListaContenedor.innerHTML = "";
+
+    // Filtrar libros que se hayan alquilado al menos una vez
+    const librosConAlquileres = libros.filter(libro => (libro.alquiladoCount || 0) > 0);
+
+    if (librosConAlquileres.length === 0) {
+        topListaContenedor.innerHTML = `
+            <div class="top-libros-vacio">
+                Aún no hay préstamos registrados. ¡Presta algún libro de la lista para iniciar el ranking!
+            </div>
+        `;
+        return;
+    }
+
+    // Ordenar de mayor a menor según el número de alquileres
+    const ranking = [...librosConAlquileres]
+        .sort((a, b) => b.alquiladoCount - a.alquiladoCount)
+        .slice(0, 3);
+
+    ranking.forEach((libro, index) => {
+        const item = document.createElement("div");
+        item.classList.add("top-libro-item");
+
+        const rankClass = `top-libro-rank--${index + 1}`;
+        
+        item.innerHTML = `
+            <div class="top-libro-rank ${rankClass}">${index + 1}</div>
+            <div class="top-libro-info">
+                <div class="top-libro-titulo" title="${libro.titulo}">${libro.titulo}</div>
+                <div class="top-libro-autor" title="${libro.autor}">${libro.autor}</div>
+            </div>
+            <div class="top-libro-count">
+                ${libro.alquiladoCount} ${libro.alquiladoCount === 1 ? 'préstamo' : 'préstamos'}
+            </div>
+        `;
+
+        topListaContenedor.appendChild(item);
     });
 }
 
