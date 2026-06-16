@@ -39,6 +39,7 @@ const formularioAñadir = document.getElementById("formularioAñadir");
 const estadoLibros = document.getElementById("estadoLibros");
 const btnImportar = document.getElementById("btnImportar");
 const btnExportar = document.getElementById("btnExportar");
+const btnExportarPdf = document.getElementById("btnExportarPdf");
 
 // Registro de manejadores de eventos
 formularioAñadir.addEventListener("submit", añadirLibro);
@@ -47,6 +48,7 @@ estadoLibros.addEventListener("change", filtrarYMostrarLibros); // Filtrado inst
 inputBuscar.addEventListener("input", filtrarYMostrarLibros); // Filtrado reactivo en tiempo real al escribir
 btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
+btnExportarPdf.addEventListener("click", exportarPdf);
 inputPortada.addEventListener("change", procesarImagenPortada);
 btnEliminarPortada.addEventListener("click", eliminarPortadaSeleccionada);
 
@@ -545,6 +547,80 @@ function exportarLibros() {
     } catch (error) {
         console.error("Error al exportar libros:", error);
         mostrarToast("No se pudieron exportar los datos.", "error");
+    }
+}
+
+/**
+ * Exporta la lista de libros actual en formato PDF utilizando jsPDF.
+ */
+function exportarPdf() {
+    if (libros.length === 0) {
+        mostrarToast("No hay libros en la colección para exportar.", "error");
+        return;
+    }
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Título del PDF
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(197, 168, 128); // Color dorado #c5a880
+        doc.text("Biblioteca Digital - Colección de Libros", 14, 20);
+
+        // Subtítulo / Fecha
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        const fecha = new Date().toLocaleDateString("es-ES", {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+        doc.text(`Reporte generado el ${fecha}`, 14, 27);
+
+        // Datos de la tabla
+        const cabeceras = [["ISBN", "Título", "Autor", "Género", "Estado", "Alquileres"]];
+        const filas = libros.map(libro => [
+            libro.isbn || "—",
+            libro.titulo,
+            libro.autor,
+            libro.genero,
+            libro.isDisponible ? "Disponible" : "Prestado",
+            `${libro.alquiladoCount || 0} préstamos`
+        ]);
+
+        // Generar la tabla en el PDF usando autotable
+        doc.autoTable({
+            startY: 32,
+            head: cabeceras,
+            body: filas,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [197, 168, 128], // Color dorado #c5a880
+                textColor: [10, 13, 12], // Oscuro #0a0d0c
+                fontStyle: 'bold'
+            },
+            styles: {
+                fontSize: 9,
+                cellPadding: 3
+            },
+            columnStyles: {
+                0: { cellWidth: 35 }, // ISBN
+                1: { cellWidth: 45 }, // Título
+                2: { cellWidth: 35 }, // Autor
+                3: { cellWidth: 30 }, // Género
+                4: { cellWidth: 22 }, // Estado
+                5: { cellWidth: 22 }  // Alquileres
+            }
+        });
+
+        // Guardar PDF
+        doc.save("biblioteca_digital_libros.pdf");
+        mostrarToast("Colección exportada a PDF correctamente.", "success");
+    } catch (error) {
+        console.error("Error al exportar a PDF:", error);
+        mostrarToast("No se pudo generar el archivo PDF.", "error");
     }
 }
 
