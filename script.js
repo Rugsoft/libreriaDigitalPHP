@@ -40,6 +40,7 @@ const estadoLibros = document.getElementById("estadoLibros");
 const btnImportar = document.getElementById("btnImportar");
 const btnExportar = document.getElementById("btnExportar");
 const btnExportarPdf = document.getElementById("btnExportarPdf");
+const btnExportarExcel = document.getElementById("btnExportarExcel");
 
 // Registro de manejadores de eventos
 formularioAñadir.addEventListener("submit", añadirLibro);
@@ -49,6 +50,7 @@ inputBuscar.addEventListener("input", filtrarYMostrarLibros); // Filtrado reacti
 btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
 btnExportarPdf.addEventListener("click", exportarPdf);
+btnExportarExcel.addEventListener("click", exportarExcel);
 inputPortada.addEventListener("change", procesarImagenPortada);
 btnEliminarPortada.addEventListener("click", eliminarPortadaSeleccionada);
 
@@ -621,6 +623,54 @@ function exportarPdf() {
     } catch (error) {
         console.error("Error al exportar a PDF:", error);
         mostrarToast("No se pudo generar el archivo PDF.", "error");
+    }
+}
+
+/**
+ * Exporta la lista de libros actual en formato Excel (.xlsx) utilizando SheetJS (XLSX).
+ */
+function exportarExcel() {
+    if (libros.length === 0) {
+        mostrarToast("No hay libros en la colección para exportar.", "error");
+        return;
+    }
+
+    try {
+        // Formatear los datos para SheetJS
+        const datos = libros.map(libro => ({
+            "ISBN": libro.isbn || "—",
+            "Título": libro.titulo,
+            "Autor": libro.autor,
+            "Género": libro.genero,
+            "Estado": libro.isDisponible ? "Disponible" : "Prestado",
+            "Alquileres": libro.alquiladoCount || 0
+        }));
+
+        // Crear una nueva hoja de cálculo
+        const hoja = XLSX.utils.json_to_sheet(datos);
+
+        // Ajustar el ancho de las columnas de forma automática
+        const anchosColumnas = [
+            { wch: 20 }, // ISBN
+            { wch: 35 }, // Título
+            { wch: 25 }, // Autor
+            { wch: 20 }, // Género
+            { wch: 15 }, // Estado
+            { wch: 12 }  // Alquileres
+        ];
+        hoja['!cols'] = anchosColumnas;
+
+        // Crear un libro de trabajo nuevo
+        const libroTrabajo = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libroTrabajo, hoja, "Libros");
+
+        // Escribir y descargar el archivo
+        XLSX.writeFile(libroTrabajo, "biblioteca_digital_libros.xlsx");
+
+        mostrarToast("Colección exportada a Excel correctamente.", "success");
+    } catch (error) {
+        console.error("Error al exportar a Excel:", error);
+        mostrarToast("No se pudo generar el archivo de Excel.", "error");
     }
 }
 
