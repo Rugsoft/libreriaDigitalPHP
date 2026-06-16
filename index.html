@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Libros</title>
+    <title>Gestión de Libros — Biblioteca Digital</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
@@ -19,7 +19,6 @@
         </header>
 
         <section class="contenedor__añadir">
-
             <h2 class="contenedor__añadir-titulo">Añadir Libros a la colección</h2>
 
             <form id="formularioAñadir">
@@ -35,30 +34,62 @@
                 <label for="ISBN">ISBN</label>
                 <input type="text" id="ISBN" placeholder="Introduzca el ISBN" required>
 
-                <button type="submit" class="contenedor__añadir-boton" id="btnAñadir">Añadir libro</button>
-                <button class="contenedor__añadir-boton oculto" id="btnCancelar">Cancelar Edición</button>
+                <button type="submit" class="contenedor__añadir-boton" id="btnAñadir">
+                    <span>Añadir libro</span>
+                </button>
+                <button type="button" class="contenedor__añadir-boton oculto" id="btnCancelar">Cancelar Edición</button>
             </form>
-            
-
         </section>
 
         <section class="contenedor__manejo-datos">
-
-        <h2 class="contenedor__manejo-datos-titulo">Manejo de Datos</h2>
-        <div class="contenedor__manejo-datos-acciones">
-            <button id="btnExportar">Exportar Datos</button>                       
-            <button id="btnImportar">Importar Datos</button>
-        </div>
-            
+            <h2 class="contenedor__manejo-datos-titulo">Manejo de Datos</h2>
+            <div class="contenedor__manejo-datos-acciones">
+                <button id="btnExportar">
+                    <svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <span>Exportar Datos</span>
+                </button>                       
+                <button id="btnImportar">
+                    <svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <span>Importar Datos</span>
+                </button>
+            </div>
         </section>
 
         <section class="contenedor__listado">
-
             <h2 class="contenedor__listado-titulo">Listado de libros</h2>
-            <p class="contenedor__listado-registros">Total Libros: 0</p>
-            <p class="contenedor__listado-registros" id="registrosDisponibles">Libros disponibles: 0</p>
+            
+            <div class="contenedor__listado-stats">
+                <div class="stat-card">
+                    <span class="stat-card__numero" id="totalLibros">0</span>
+                    <span class="stat-card__etiqueta">Total Libros</span>
+                </div>
+                <div class="stat-card stat-card--disponible">
+                    <span class="stat-card__numero" id="registrosDisponibles">0</span>
+                    <span class="stat-card__etiqueta">Disponibles</span>
+                </div>
+                <div class="stat-card stat-card--prestado">
+                    <span class="stat-card__numero" id="registrosNoDisponibles">0</span>
+                    <span class="stat-card__etiqueta">Prestados</span>
+                </div>
+            </div>
 
-            <p class="contenedor__listado-registros" id="registrosNoDisponibles">Libros no disponibles: 0</p>
+            <div class="contenedor__botones">
+                <div class="buscar-wrapper">
+                    <svg class="buscar-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
+                    </svg>
+                    <input type="text" id="buscar" placeholder="Buscar por título, autor, género o ISBN...">
+                </div>
+                <select name="estadoLibros" id="estadoLibros">
+                    <option value="todos">Todos los libros</option>
+                    <option value="disponibles">Disponibles</option>
+                    <option value="noDisponibles">Prestados</option>
+                </select>
+            </div>
 
             <div class="contenedor__tabla-wrapper">
                 <table class="contenedor__listado-tabla">
@@ -68,7 +99,7 @@
                             <th>Título</th>
                             <th>Autor</th>
                             <th>Género</th>
-                            <th>Disponibilidad</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -76,18 +107,28 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="contenedor__botones">
-                <select name="estadoLibros" id="estadoLibros">
-                    <option value="todos">Todos</option>
-                    <option value="disponibles">Disponibles</option>
-                    <option value="noDisponibles">No disponibles</option>
-                </select>
-                <input type="text" id="buscar" placeholder="Título/autor o género">
-            </div>
-
         </section>
 
+    </div>
+
+    <!-- Toast de Notificaciones -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Modal de Confirmación -->
+    <div id="modalConfirmacion" class="modal oculto">
+        <div class="modal__contenido">
+            <div class="modal__cabecera">
+                <svg class="modal__icono-alerta" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <h3 class="modal__titulo">Confirmar Eliminación</h3>
+            </div>
+            <p class="modal__mensaje">¿Estás seguro de que deseas eliminar este libro de la colección? Esta acción no se puede deshacer.</p>
+            <div class="modal__acciones">
+                <button id="modalBtnCancelar" class="btn-secundario">Cancelar</button>
+                <button id="modalBtnConfirmar" class="btn-peligro">Eliminar</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
