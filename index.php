@@ -8,7 +8,6 @@
     include './includes/tablaLibros.php';
 ?>
 
-    </div>
     <!-- Toast de Notificaciones -->
     <div id="toastContainer" class="toast-container"></div>
 
@@ -34,13 +33,8 @@
         </div>
     </div>
 
-    <!-- Pie de página (Footer) -->
-        <footer class="contenedor__pie">
-            <h2 class="contenedor__pie-titulo">Biblioteca Digital</h2>
-            <p class="contenedor__pie-lema">Cultivando el conocimiento, página a página.</p>
-            <p class="contenedor__pie-copyright">&copy; <?php echo date("Y"); ?> Gestión de Libros. Todos los derechos reservados.</p>
-        </footer>
+    </div> <!-- Cierre del contenedor principal -->
 
-    <script src="script.js"></script>
-</body>
-</html>
+<?php
+    include './includes/footer.php';
+?>
