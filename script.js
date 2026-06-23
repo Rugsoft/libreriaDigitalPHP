@@ -43,9 +43,12 @@ const btnExportarPdf = document.getElementById("btnExportarPdf");
 const btnExportarExcel = document.getElementById("btnExportarExcel");
 
 // Registro de manejadores de eventos
-formularioAñadir.addEventListener("submit", añadirLibro);
+// formularioAñadir.addEventListener("submit", añadirLibro);
 btnCancelar.addEventListener("click", limpiarFormulario);
-estadoLibros.addEventListener("change", filtrarYMostrarLibros); // Filtrado instantáneo al cambiar el selector
+estadoLibros.addEventListener("change", () => {
+  const estado = estadoLibros.value;
+  window.location.href = 'index.php?estado=' + estado;
+}); // Recarga de página aplicando el filtro en el servidor
 inputBuscar.addEventListener("input", filtrarYMostrarLibros); // Filtrado reactivo en tiempo real al escribir
 btnImportar.addEventListener("click", importarLibros);
 btnExportar.addEventListener("click", exportarLibros);
@@ -60,12 +63,14 @@ tablaLibros.addEventListener("mousemove", moverHoverPortada);
 tablaLibros.addEventListener("mouseout", ocultarHoverPortada);
 
 // Registro de eventos para el Modal de Confirmación
-document.getElementById("modalBtnCancelar").addEventListener("click", cerrarModalEliminar);
+document
+  .getElementById("modalBtnCancelar")
+  .addEventListener("click", cerrarModalEliminar);
 document.getElementById("modalBtnConfirmar").addEventListener("click", () => {
-    if (isbnParaEliminar) {
-        ejecutarEliminacion(isbnParaEliminar);
-    }
-    cerrarModalEliminar();
+  if (isbnParaEliminar) {
+    ejecutarEliminacion(isbnParaEliminar);
+  }
+  cerrarModalEliminar();
 });
 
 /**
@@ -73,44 +78,44 @@ document.getElementById("modalBtnConfirmar").addEventListener("click", () => {
  * @param {string} mensaje - El texto a mostrar.
  * @param {string} tipo - El tipo de notificación ('success' o 'error').
  */
-function mostrarToast(mensaje, tipo = 'success') {
-    const container = document.getElementById("toastContainer");
-    if (!container) return;
+function mostrarToast(mensaje, tipo = "success") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
 
-    const toast = document.createElement("div");
-    toast.classList.add("toast");
-    if (tipo === 'success') {
-        toast.classList.add("toast--success");
-        toast.innerHTML = `
+  const toast = document.createElement("div");
+  toast.classList.add("toast");
+  if (tipo === "success") {
+    toast.classList.add("toast--success");
+    toast.innerHTML = `
             <svg class="toast-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             <span>${mensaje}</span>
         `;
-    } else {
-        toast.classList.add("toast--error");
-        toast.innerHTML = `
+  } else {
+    toast.classList.add("toast--error");
+    toast.innerHTML = `
             <svg class="toast-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             <span>${mensaje}</span>
         `;
-    }
+  }
 
-    container.appendChild(toast);
+  container.appendChild(toast);
 
-    // Activar animación de entrada
+  // Activar animación de entrada
+  setTimeout(() => {
+    toast.classList.add("mostrar");
+  }, 10);
+
+  // Auto-desvanecer y eliminar del DOM
+  setTimeout(() => {
+    toast.classList.remove("mostrar");
     setTimeout(() => {
-        toast.classList.add("mostrar");
-    }, 10);
-
-    // Auto-desvanecer y eliminar del DOM
-    setTimeout(() => {
-        toast.classList.remove("mostrar");
-        setTimeout(() => {
-            toast.remove();
-        }, 350);
-    }, 3500);
+      toast.remove();
+    }, 350);
+  }, 3500);
 }
 
 /**
@@ -118,19 +123,19 @@ function mostrarToast(mensaje, tipo = 'success') {
  * @param {string} isbn - El ISBN del libro a eliminar.
  */
 function abrirModalEliminar(isbn) {
-    isbnParaEliminar = isbn;
-    const modal = document.getElementById("modalConfirmacion");
-    modal.classList.remove("oculto");
-    document.getElementById("modalBtnConfirmar").focus();
+  isbnParaEliminar = isbn;
+  const modal = document.getElementById("modalConfirmacion");
+  modal.classList.remove("oculto");
+  document.getElementById("modalBtnConfirmar").focus();
 }
 
 /**
  * Cierra el modal de confirmación de borrado.
  */
 function cerrarModalEliminar() {
-    isbnParaEliminar = null;
-    const modal = document.getElementById("modalConfirmacion");
-    modal.classList.add("oculto");
+  isbnParaEliminar = null;
+  const modal = document.getElementById("modalConfirmacion");
+  modal.classList.add("oculto");
 }
 
 /**
@@ -138,92 +143,112 @@ function cerrarModalEliminar() {
  * @param {Event} event - Evento del formulario.
  */
 function añadirLibro(event) {
-    if (event) event.preventDefault();
+  if (event) event.preventDefault();
 
-    const titulo = inputTitulo.value.trim();
-    const autor = inputAutor.value.trim();
-    const genero = inputGenero.value.trim();
-    const isbn = inputIsbn.value.trim();
+  const titulo = inputTitulo.value.trim();
+  const autor = inputAutor.value.trim();
+  const genero = inputGenero.value.trim();
+  const isbn = inputIsbn.value.trim();
 
-    // Validar que todos los campos estén llenos
-    if (titulo === "" || autor === "" || genero === "" || isbn === "") {
-        mostrarToast("Por favor, rellene todos los campos antes de añadir el libro.", "error");
+  // Validar que todos los campos estén llenos
+  if (titulo === "" || autor === "" || genero === "" || isbn === "") {
+    mostrarToast(
+      "Por favor, rellene todos los campos antes de añadir el libro.",
+      "error",
+    );
+    return;
+  }
+
+  if (isbnModificacion !== null) {
+    // Encontrar la posición del libro original por su ISBN previo
+    const indice = libros.findIndex((libro) => libro.isbn === isbnModificacion);
+
+    if (indice !== -1) {
+      // Validar que el nuevo ISBN no esté ya en uso por otro libro diferente
+      const isbnDuplicado = libros.some(
+        (libro, i) => libro.isbn === isbn && i !== indice,
+      );
+      if (isbnDuplicado) {
+        mostrarToast(
+          "Error: Ya existe otro libro registrado con este ISBN.",
+          "error",
+        );
+        inputIsbn.focus();
         return;
+      }
+
+      // Actualizar los datos del libro existente
+      libros[indice] = {
+        titulo,
+        autor,
+        genero,
+        isbn,
+        isDisponible: libros[indice].isDisponible,
+        alquiladoCount: libros[indice].alquiladoCount || 0,
+        portada: portadaBase64,
+      };
+      mostrarToast(`"${titulo}" se ha actualizado correctamente.`, "success");
+    }
+    isbnModificacion = null;
+    btnAñadir.innerHTML = "<span>Añadir libro</span>";
+  } else {
+    // Validar que el ISBN del nuevo libro no esté repetido
+    const isbnDuplicado = libros.some((libro) => libro.isbn === isbn);
+    if (isbnDuplicado) {
+      mostrarToast(
+        "Error: Ya existe un libro registrado con este ISBN.",
+        "error",
+      );
+      inputIsbn.focus();
+      return;
     }
 
-    if (isbnModificacion !== null) {
-        // Encontrar la posición del libro original por su ISBN previo
-        const indice = libros.findIndex(libro => libro.isbn === isbnModificacion);
+    // Crear y añadir el nuevo objeto de libro
+    const nuevoLibro = {
+      titulo,
+      autor,
+      genero,
+      isbn,
+      isDisponible: true,
+      alquiladoCount: 0,
+      portada: portadaBase64,
+    };
+    libros.push(nuevoLibro);
+    mostrarToast(
+      `"${titulo}" se ha añadido correctamente a la colección.`,
+      "success",
+    );
+  }
 
-        if (indice !== -1) {
-            // Validar que el nuevo ISBN no esté ya en uso por otro libro diferente
-            const isbnDuplicado = libros.some((libro, i) => libro.isbn === isbn && i !== indice);
-            if (isbnDuplicado) {
-                mostrarToast("Error: Ya existe otro libro registrado con este ISBN.", "error");
-                inputIsbn.focus();
-                return;
-            }
-
-            // Actualizar los datos del libro existente
-            libros[indice] = {
-                titulo,
-                autor,
-                genero,
-                isbn,
-                isDisponible: libros[indice].isDisponible,
-                alquiladoCount: libros[indice].alquiladoCount || 0,
-                portada: portadaBase64
-            };
-            mostrarToast(`"${titulo}" se ha actualizado correctamente.`, "success");
-        }
-        isbnModificacion = null;
-        btnAñadir.innerHTML = "<span>Añadir libro</span>";
-    } else {
-        // Validar que el ISBN del nuevo libro no esté repetido
-        const isbnDuplicado = libros.some(libro => libro.isbn === isbn);
-        if (isbnDuplicado) {
-            mostrarToast("Error: Ya existe un libro registrado con este ISBN.", "error");
-            inputIsbn.focus();
-            return;
-        }
-
-        // Crear y añadir el nuevo objeto de libro
-        const nuevoLibro = {
-            titulo,
-            autor,
-            genero,
-            isbn,
-            isDisponible: true,
-            alquiladoCount: 0,
-            portada: portadaBase64
-        };
-        libros.push(nuevoLibro);
-        mostrarToast(`"${titulo}" se ha añadido correctamente a la colección.`, "success");
-    }
-
-    limpiarFormulario();
-    guardarLibrosLocalStorage();
-    filtrarYMostrarLibros();
+  limpiarFormulario();
+  guardarLibrosLocalStorage();
+  filtrarYMostrarLibros();
 }
 
 /**
  * Limpia los valores de los inputs del formulario y regresa el foco al título.
  */
 function limpiarFormulario() {
-    inputTitulo.value = "";
-    inputAutor.value = "";
-    inputGenero.value = "";
-    inputIsbn.value = "";
-    inputPortada.value = "";
-    portadaBase64 = "";
-    previewImg.src = "";
-    previewContainer.classList.add("oculto");
-    labelPortada.classList.remove("oculto");
-    inputTitulo.focus();
-    btnAñadir.innerHTML = "<span>Añadir libro</span>";
-    isbnModificacion = null;
-    btnCancelar.classList.add("oculto");
-    tituloInput.textContent = "Añadir Libros a la Colección";
+  inputTitulo.value = "";
+  inputAutor.value = "";
+  inputGenero.value = "";
+  inputIsbn.value = "";
+  inputPortada.value = "";
+  portadaBase64 = "";
+  previewImg.src = "";
+  previewContainer.classList.add("oculto");
+  labelPortada.classList.remove("oculto");
+  
+  // Limpiar campos añadidos (Año, Páginas e ISBN Original)
+  if (document.getElementById("año")) document.getElementById("año").value = "";
+  if (document.getElementById("paginas")) document.getElementById("paginas").value = "";
+  if (document.getElementById("isbnOriginal")) document.getElementById("isbnOriginal").value = "";
+
+  inputTitulo.focus();
+  btnAñadir.innerHTML = "<span>Añadir libro</span>";
+  isbnModificacion = null;
+  btnCancelar.classList.add("oculto");
+  tituloInput.textContent = "Añadir Libros a la Colección";
 }
 
 /**
@@ -231,34 +256,34 @@ function limpiarFormulario() {
  * Esta función unifica la renderización reactiva de la aplicación.
  */
 function filtrarYMostrarLibros() {
-    const criterioEstado = estadoLibros.value; // "todos", "disponibles", "noDisponibles"
-    const criterioBusqueda = inputBuscar.value.trim().toLowerCase();
+  const criterioEstado = estadoLibros.value; // "todos", "disponibles", "noDisponibles"
+  const criterioBusqueda = inputBuscar.value.trim().toLowerCase();
 
-    const librosFiltrados = libros.filter(libro => {
-        // 1. Filtrar por estado de disponibilidad
-        let cumpleEstado = true;
-        if (criterioEstado === "disponibles") {
-            cumpleEstado = libro.isDisponible;
-        } else if (criterioEstado === "noDisponibles") {
-            cumpleEstado = !libro.isDisponible;
-        }
+  const librosFiltrados = libros.filter((libro) => {
+    // 1. Filtrar por estado de disponibilidad
+    let cumpleEstado = true;
+    if (criterioEstado === "disponibles") {
+      cumpleEstado = libro.isDisponible;
+    } else if (criterioEstado === "noDisponibles") {
+      cumpleEstado = !libro.isDisponible;
+    }
 
-        // 2. Filtrar por término de búsqueda (Título, Autor, Género o ISBN)
-        let cumpleBusqueda = true;
-        if (criterioBusqueda !== "") {
-            // Asegurar que exista el ISBN antes de buscar sobre él
-            const isbnLibro = libro.isbn ? libro.isbn.toLowerCase() : "";
-            cumpleBusqueda =
-                libro.titulo.toLowerCase().includes(criterioBusqueda) ||
-                libro.autor.toLowerCase().includes(criterioBusqueda) ||
-                libro.genero.toLowerCase().includes(criterioBusqueda) ||
-                isbnLibro.includes(criterioBusqueda);
-        }
+    // 2. Filtrar por término de búsqueda (Título, Autor, Género o ISBN)
+    let cumpleBusqueda = true;
+    if (criterioBusqueda !== "") {
+      // Asegurar que exista el ISBN antes de buscar sobre él
+      const isbnLibro = libro.isbn ? libro.isbn.toLowerCase() : "";
+      cumpleBusqueda =
+        libro.titulo.toLowerCase().includes(criterioBusqueda) ||
+        libro.autor.toLowerCase().includes(criterioBusqueda) ||
+        libro.genero.toLowerCase().includes(criterioBusqueda) ||
+        isbnLibro.includes(criterioBusqueda);
+    }
 
-        return cumpleEstado && cumpleBusqueda;
-    });
+    return cumpleEstado && cumpleBusqueda;
+  });
 
-    mostrarLibros(librosFiltrados);
+  mostrarLibros(librosFiltrados);
 }
 
 /**
@@ -266,15 +291,15 @@ function filtrarYMostrarLibros() {
  * @param {Array} datosLibros - Array de libros a pintar.
  */
 function mostrarLibros(datosLibros = libros) {
-    tablaLibros.innerHTML = "";
+  tablaLibros.innerHTML = "";
 
-    if (datosLibros.length === 0) {
-        // Mostrar Empty State elegante si no hay resultados
-        const filaVacia = document.createElement("tr");
-        const celdaVacia = document.createElement("td");
-        celdaVacia.setAttribute("colspan", "7");
-        
-        celdaVacia.innerHTML = `
+  if (datosLibros.length === 0) {
+    // Mostrar Empty State elegante si no hay resultados
+    const filaVacia = document.createElement("tr");
+    const celdaVacia = document.createElement("td");
+    celdaVacia.setAttribute("colspan", "7");
+
+    celdaVacia.innerHTML = `
             <div class="empty-state">
                 <svg class="empty-state__icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
@@ -283,131 +308,131 @@ function mostrarLibros(datosLibros = libros) {
                 <p class="empty-state__texto">Tu colección está vacía o no hay libros que coincidan con los filtros de búsqueda.</p>
             </div>
         `;
-        filaVacia.appendChild(celdaVacia);
-        tablaLibros.appendChild(filaVacia);
-        actualizarRegistro();
-        return;
-    }
+    filaVacia.appendChild(celdaVacia);
+    tablaLibros.appendChild(filaVacia);
+    actualizarRegistro();
+    return;
+  }
 
-    datosLibros.forEach((libro) => {
-        const fila = document.createElement("tr");
+  datosLibros.forEach((libro) => {
+    const fila = document.createElement("tr");
 
-        // Celda del ISBN
-        const tdIsbn = document.createElement("td");
-        tdIsbn.textContent = libro.isbn || "—";
+    // Celda del ISBN
+    const tdIsbn = document.createElement("td");
+    tdIsbn.textContent = libro.isbn || "—";
 
-        // Celda de Portada
-        const tdPortada = document.createElement("td");
-        if (libro.portada) {
-            const imgPortada = document.createElement("img");
-            imgPortada.src = libro.portada;
-            imgPortada.classList.add("tabla-portada");
-            imgPortada.alt = `Portada de ${libro.titulo}`;
-            tdPortada.appendChild(imgPortada);
-        } else {
-            const divPlaceholder = document.createElement("div");
-            divPlaceholder.classList.add("tabla-portada-placeholder");
-            divPlaceholder.innerHTML = `
+    // Celda de Portada
+    const tdPortada = document.createElement("td");
+    if (libro.portada) {
+      const imgPortada = document.createElement("img");
+      imgPortada.src = libro.portada;
+      imgPortada.classList.add("tabla-portada");
+      imgPortada.alt = `Portada de ${libro.titulo}`;
+      tdPortada.appendChild(imgPortada);
+    } else {
+      const divPlaceholder = document.createElement("div");
+      divPlaceholder.classList.add("tabla-portada-placeholder");
+      divPlaceholder.innerHTML = `
                 <svg class="placeholder-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                 </svg>
             `;
-            tdPortada.appendChild(divPlaceholder);
-        }
+      tdPortada.appendChild(divPlaceholder);
+    }
 
-        // Celda del Título
-        const tdTitulo = document.createElement("td");
-        tdTitulo.textContent = libro.titulo;
+    // Celda del Título
+    const tdTitulo = document.createElement("td");
+    tdTitulo.textContent = libro.titulo;
 
-        // Celda del Autor
-        const tdAutor = document.createElement("td");
-        tdAutor.textContent = libro.autor;
+    // Celda del Autor
+    const tdAutor = document.createElement("td");
+    tdAutor.textContent = libro.autor;
 
-        // Celda del Género
-        const tdGenero = document.createElement("td");
-        tdGenero.textContent = libro.genero;
+    // Celda del Género
+    const tdGenero = document.createElement("td");
+    tdGenero.textContent = libro.genero;
 
-        // Celda de Disponibilidad
-        const tdDisponibilidad = document.createElement("td");
-        const spanEstado = document.createElement("span");
-        spanEstado.classList.add("status-badge");
-        if (libro.isDisponible) {
-            spanEstado.textContent = "Disponible";
-            spanEstado.classList.add("status-badge--disponible");
-        } else {
-            spanEstado.textContent = "Prestado";
-            spanEstado.classList.add("status-badge--prestado");
-        }
-        tdDisponibilidad.appendChild(spanEstado);
+    // Celda de Disponibilidad
+    const tdDisponibilidad = document.createElement("td");
+    const spanEstado = document.createElement("span");
+    spanEstado.classList.add("status-badge");
+    if (libro.isDisponible) {
+      spanEstado.textContent = "Disponible";
+      spanEstado.classList.add("status-badge--disponible");
+    } else {
+      spanEstado.textContent = "Prestado";
+      spanEstado.classList.add("status-badge--prestado");
+    }
+    tdDisponibilidad.appendChild(spanEstado);
 
-        // Celda de Acciones con sus respectivos botones
-        const tdAcciones = document.createElement("td");
-        const contenedorBotones = document.createElement("div");
-        contenedorBotones.classList.add("contenedor__listado-acciones");
+    // Celda de Acciones con sus respectivos botones
+    const tdAcciones = document.createElement("td");
+    const contenedorBotones = document.createElement("div");
+    contenedorBotones.classList.add("contenedor__listado-acciones");
 
-        // Botón Eliminar
-        const botonEliminar = document.createElement("button");
-        botonEliminar.classList.add("boton-eliminar");
-        botonEliminar.innerHTML = `
+    // Botón Eliminar
+    const botonEliminar = document.createElement("button");
+    botonEliminar.classList.add("boton-eliminar");
+    botonEliminar.innerHTML = `
             <svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
             </svg>
             <span>Eliminar</span>
         `;
-        botonEliminar.addEventListener("click", () => eliminarLibro(libro.isbn));
+    botonEliminar.addEventListener("click", () => eliminarLibro(libro.isbn));
 
-        // Botón Modificar
-        const botonModificar = document.createElement("button");
-        botonModificar.classList.add("boton-modificar");
-        botonModificar.innerHTML = `
+    // Botón Modificar
+    const botonModificar = document.createElement("button");
+    botonModificar.classList.add("boton-modificar");
+    botonModificar.innerHTML = `
             <svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.082a4.5 4.5 0 0 1-2.054 1.215L2.5 22l.707-2.278a4.5 4.5 0 0 1 1.215-2.054l12.44-12.44Z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125 16.862 4.487" />
             </svg>
             <span>Modificar</span>
         `;
-        botonModificar.addEventListener("click", () => modificarLibro(libro.isbn));
+    botonModificar.addEventListener("click", () => modificarLibro(libro.isbn));
 
-        // Botón Prestar / Devolver
-        const botonPrestar = document.createElement("button");
-        botonPrestar.classList.add("boton-prestar");
-        const prestadoSvg = `<svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>`;
-        const prestarSvg = `<svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l6 6m0 0l-6 6m6-6H9a6 6 0 0 1 0-12h3" /></svg>`;
-        botonPrestar.innerHTML = libro.isDisponible ? 
-            `${prestarSvg}<span>Prestar</span>` : 
-            `${prestadoSvg}<span>Devolver</span>`;
-        botonPrestar.addEventListener("click", () => prestamoLibro(libro.isbn));
+    // Botón Prestar / Devolver
+    const botonPrestar = document.createElement("button");
+    botonPrestar.classList.add("boton-prestar");
+    const prestadoSvg = `<svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>`;
+    const prestarSvg = `<svg class="btn-icono" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l6 6m0 0l-6 6m6-6H9a6 6 0 0 1 0-12h3" /></svg>`;
+    botonPrestar.innerHTML = libro.isDisponible
+      ? `${prestarSvg}<span>Prestar</span>`
+      : `${prestadoSvg}<span>Devolver</span>`;
+    botonPrestar.addEventListener("click", () => prestamoLibro(libro.isbn));
 
-        contenedorBotones.appendChild(botonEliminar);
-        contenedorBotones.appendChild(botonModificar);
-        contenedorBotones.appendChild(botonPrestar);
-        tdAcciones.appendChild(contenedorBotones);
+    contenedorBotones.appendChild(botonEliminar);
+    contenedorBotones.appendChild(botonModificar);
+    contenedorBotones.appendChild(botonPrestar);
+    tdAcciones.appendChild(contenedorBotones);
 
-        // Añadir todas las celdas a la fila
-        fila.appendChild(tdIsbn);
-        fila.appendChild(tdPortada);
-        fila.appendChild(tdTitulo);
-        fila.appendChild(tdAutor);
-        fila.appendChild(tdGenero);
-        fila.appendChild(tdDisponibilidad);
-        fila.appendChild(tdAcciones);
+    // Añadir todas las celdas a la fila
+    fila.appendChild(tdIsbn);
+    fila.appendChild(tdPortada);
+    fila.appendChild(tdTitulo);
+    fila.appendChild(tdAutor);
+    fila.appendChild(tdGenero);
+    fila.appendChild(tdDisponibilidad);
+    fila.appendChild(tdAcciones);
 
-        // Insertar la fila en el cuerpo de la tabla
-        tablaLibros.appendChild(fila);
-    });
+    // Insertar la fila en el cuerpo de la tabla
+    tablaLibros.appendChild(fila);
+  });
 
-    actualizarRegistro();
+  actualizarRegistro();
 }
 
 /**
  * Actualiza los contadores de cantidad total y libros disponibles en el DOM.
  */
 function actualizarRegistro() {
-    numeroRegistros.textContent = libros.length;
-    const disponibles = libros.filter(libro => libro.isDisponible).length;
-    registroDisponibles.textContent = disponibles;
-    registroNoDisponibles.textContent = libros.length - disponibles;
-    actualizarTopLibros();
+  numeroRegistros.textContent = libros.length;
+  const disponibles = libros.filter((libro) => libro.isDisponible).length;
+  registroDisponibles.textContent = disponibles;
+  registroNoDisponibles.textContent = libros.length - disponibles;
+  actualizarTopLibros();
 }
 
 /**
@@ -415,7 +440,7 @@ function actualizarRegistro() {
  * @param {string} isbn - El ISBN del libro a eliminar.
  */
 function eliminarLibro(isbn) {
-    abrirModalEliminar(isbn);
+  abrirModalEliminar(isbn);
 }
 
 /**
@@ -423,51 +448,54 @@ function eliminarLibro(isbn) {
  * @param {string} isbn - El ISBN del libro.
  */
 function ejecutarEliminacion(isbn) {
-    const indice = libros.findIndex(libro => libro.isbn === isbn);
-    if (indice !== -1) {
-        const tituloEliminado = libros[indice].titulo;
-        libros.splice(indice, 1);
-        guardarLibrosLocalStorage();
-        filtrarYMostrarLibros();
-        mostrarToast(`"${tituloEliminado}" se ha eliminado de la colección.`, "success");
-    }
+  // Redireccionar al script de PHP para eliminar de la base de datos
+  window.location.href = 'includes/eliminarLibro.php?ISBN=' + isbn;
 }
 
 /**
  * Carga los datos de un libro en el formulario para editarlo.
- * @param {string} isbn - El ISBN del libro a modificar.
+ * @param {HTMLElement} elemento - El botón Modificar que contiene los atributos data-*.
  */
-function modificarLibro(isbn) {
-    const indice = libros.findIndex(libro => libro.isbn === isbn);
+function modificarLibro(elemento) {
+  // Obtener los datos desde los atributos data-* del elemento
+  const isbn = elemento.getAttribute("data-isbn") || "";
+  const titulo = elemento.getAttribute("data-titulo") || "";
+  const autor = elemento.getAttribute("data-autor") || "";
+  const genero = elemento.getAttribute("data-genero") || "";
+  const ano = elemento.getAttribute("data-ano") || "";
+  const paginas = elemento.getAttribute("data-paginas") || "";
+  const portada = elemento.getAttribute("data-portada") || "";
 
-    if (indice === -1) return;
+  // Poblar los campos del formulario con los valores del libro seleccionado
+  inputTitulo.value = titulo;
+  inputAutor.value = autor;
+  inputGenero.value = genero;
+  inputIsbn.value = isbn;
+  
+  if (document.getElementById("año")) document.getElementById("año").value = ano;
+  if (document.getElementById("paginas")) document.getElementById("paginas").value = paginas;
+  if (document.getElementById("isbnOriginal")) document.getElementById("isbnOriginal").value = isbn;
 
-    // Poblar los campos del formulario con los valores del libro seleccionado
-    inputTitulo.value = libros[indice].titulo;
-    inputAutor.value = libros[indice].autor;
-    inputGenero.value = libros[indice].genero;
-    inputIsbn.value = libros[indice].isbn || "";
+  // Cargar la portada si existe
+  if (portada) {
+    portadaBase64 = portada;
+    previewImg.src = portada;
+    previewContainer.classList.remove("oculto");
+    labelPortada.classList.add("oculto");
+  } else {
+    portadaBase64 = "";
+    previewImg.src = "";
+    previewContainer.classList.add("oculto");
+    labelPortada.classList.remove("oculto");
+  }
 
-    // Cargar la portada si existe
-    if (libros[indice].portada) {
-        portadaBase64 = libros[indice].portada;
-        previewImg.src = portadaBase64;
-        previewContainer.classList.remove("oculto");
-        labelPortada.classList.add("oculto");
-    } else {
-        portadaBase64 = "";
-        previewImg.src = "";
-        previewContainer.classList.add("oculto");
-        labelPortada.classList.remove("oculto");
-    }
+  // Guardar el ISBN actual para seguimiento en cliente
+  isbnModificacion = isbn;
 
-    // Guardar el ISBN actual para poder rastrear el libro original si se cambia su ISBN
-    isbnModificacion = isbn;
-
-    btnAñadir.innerHTML = "<span>Guardar Cambios</span>";
-    btnCancelar.classList.remove("oculto");
-    tituloInput.textContent = "Editar Libro";
-    inputTitulo.focus();
+  btnAñadir.innerHTML = "<span>Guardar Cambios</span>";
+  btnCancelar.classList.remove("oculto");
+  tituloInput.textContent = "Editar Libro";
+  inputTitulo.focus();
 }
 
 /**
@@ -475,293 +503,296 @@ function modificarLibro(isbn) {
  * @param {string} isbn - El ISBN del libro.
  */
 function prestamoLibro(isbn) {
-    const indice = libros.findIndex(libro => libro.isbn === isbn);
-
-    if (indice !== -1) {
-        const libro = libros[indice];
-        libro.isDisponible = !libro.isDisponible;
-        if (!libro.isDisponible) {
-            libro.alquiladoCount = (libro.alquiladoCount || 0) + 1;
-        }
-        guardarLibrosLocalStorage();
-        filtrarYMostrarLibros();
-        const mensaje = libro.isDisponible ? 
-            `"${libro.titulo}" ha sido devuelto y está disponible.` : 
-            `"${libro.titulo}" ha sido prestado.`;
-        mostrarToast(mensaje, "success");
-    }
+  // Redireccionar al script de PHP para alternar el préstamo en la base de datos
+  window.location.href = 'includes/prestamoLibro.php?ISBN=' + isbn;
 }
 
 /**
  * Guarda la lista actual de libros en el almacenamiento local (localStorage).
  */
 function guardarLibrosLocalStorage() {
-    try {
-        localStorage.setItem("libros", JSON.stringify(libros));
-    } catch (error) {
-        console.error("No se pudo guardar en localStorage:", error);
-        mostrarToast("Ocurrió un error al intentar guardar los datos localmente.", "error");
-    }
+  try {
+    localStorage.setItem("libros", JSON.stringify(libros));
+  } catch (error) {
+    console.error("No se pudo guardar en localStorage:", error);
+    mostrarToast(
+      "Ocurrió un error al intentar guardar los datos localmente.",
+      "error",
+    );
+  }
 }
 
 /**
  * Carga los libros desde el almacenamiento local y normaliza los datos.
  */
 function cargarLibrosLocalStorage() {
-    try {
-        const librosLocalStorage = localStorage.getItem("libros");
-        if (librosLocalStorage) {
-            const cargados = JSON.parse(librosLocalStorage);
-            // Normalizar datos viejos agregándoles un ISBN autogenerado si no lo tuvieran
-            libros = cargados.map((libro, index) => {
-                if (!libro.isbn) {
-                    libro.isbn = `MIG-${Date.now()}-${index}`;
-                }
-                if (libro.alquiladoCount === undefined) {
-                    libro.alquiladoCount = 0;
-                }
-                return libro;
-            });
-        } else {
-            libros = [];
+  try {
+    const librosLocalStorage = localStorage.getItem("libros");
+    if (librosLocalStorage) {
+      const cargados = JSON.parse(librosLocalStorage);
+      // Normalizar datos viejos agregándoles un ISBN autogenerado si no lo tuvieran
+      libros = cargados.map((libro, index) => {
+        if (!libro.isbn) {
+          libro.isbn = `MIG-${Date.now()}-${index}`;
         }
-    } catch (error) {
-        console.error("No se pudo cargar desde localStorage:", error);
-        mostrarToast("Ocurrió un error al intentar cargar los datos guardados.", "error");
-        libros = [];
+        if (libro.alquiladoCount === undefined) {
+          libro.alquiladoCount = 0;
+        }
+        return libro;
+      });
+    } else {
+      libros = [];
     }
+  } catch (error) {
+    console.error("No se pudo cargar desde localStorage:", error);
+    mostrarToast(
+      "Ocurrió un error al intentar cargar los datos guardados.",
+      "error",
+    );
+    libros = [];
+  }
 }
 
 /**
  * Exporta la lista de libros actual en formato JSON para su descarga.
  */
 function exportarLibros() {
-    try {
-        const datos = JSON.stringify(libros, null, 4);
-        const archivo = new Blob([datos], { type: "application/json" });
-        const url = URL.createObjectURL(archivo);
-        const enlace = document.createElement("a");
-        enlace.href = url;
-        enlace.download = "libros.json";
-        enlace.click();
-        URL.revokeObjectURL(url);
-        mostrarToast("Datos exportados correctamente en formato JSON.", "success");
-    } catch (error) {
-        console.error("Error al exportar libros:", error);
-        mostrarToast("No se pudieron exportar los datos.", "error");
-    }
+  try {
+    const datos = JSON.stringify(libros, null, 4);
+    const archivo = new Blob([datos], { type: "application/json" });
+    const url = URL.createObjectURL(archivo);
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = "libros.json";
+    enlace.click();
+    URL.revokeObjectURL(url);
+    mostrarToast("Datos exportados correctamente en formato JSON.", "success");
+  } catch (error) {
+    console.error("Error al exportar libros:", error);
+    mostrarToast("No se pudieron exportar los datos.", "error");
+  }
 }
 
 /**
  * Exporta la lista de libros actual en formato PDF utilizando jsPDF.
  */
 function exportarPdf() {
-    if (libros.length === 0) {
-        mostrarToast("No hay libros en la colección para exportar.", "error");
-        return;
-    }
+  if (libros.length === 0) {
+    mostrarToast("No hay libros en la colección para exportar.", "error");
+    return;
+  }
 
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-        // Título del PDF
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(18);
-        doc.setTextColor(197, 168, 128); // Color dorado #c5a880
-        doc.text("Biblioteca Digital - Colección de Libros", 14, 20);
+    // Título del PDF
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(197, 168, 128); // Color dorado #c5a880
+    doc.text("Biblioteca Digital - Colección de Libros", 14, 20);
 
-        // Subtítulo / Fecha
-        doc.setFont("Helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        const fecha = new Date().toLocaleDateString("es-ES", {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-        doc.text(`Reporte generado el ${fecha}`, 14, 27);
+    // Subtítulo / Fecha
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    const fecha = new Date().toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    doc.text(`Reporte generado el ${fecha}`, 14, 27);
 
-        // Datos de la tabla
-        const cabeceras = [["ISBN", "Título", "Autor", "Género", "Estado", "Alquileres"]];
-        const filas = libros.map(libro => [
-            libro.isbn || "—",
-            libro.titulo,
-            libro.autor,
-            libro.genero,
-            libro.isDisponible ? "Disponible" : "Prestado",
-            `${libro.alquiladoCount || 0} préstamos`
-        ]);
+    // Datos de la tabla
+    const cabeceras = [
+      ["ISBN", "Título", "Autor", "Género", "Estado", "Alquileres"],
+    ];
+    const filas = libros.map((libro) => [
+      libro.isbn || "—",
+      libro.titulo,
+      libro.autor,
+      libro.genero,
+      libro.isDisponible ? "Disponible" : "Prestado",
+      `${libro.alquiladoCount || 0} préstamos`,
+    ]);
 
-        // Generar la tabla en el PDF usando autotable
-        doc.autoTable({
-            startY: 32,
-            head: cabeceras,
-            body: filas,
-            theme: 'grid',
-            headStyles: {
-                fillColor: [197, 168, 128], // Color dorado #c5a880
-                textColor: [10, 13, 12], // Oscuro #0a0d0c
-                fontStyle: 'bold'
-            },
-            styles: {
-                fontSize: 9,
-                cellPadding: 3
-            },
-            columnStyles: {
-                0: { cellWidth: 35 }, // ISBN
-                1: { cellWidth: 45 }, // Título
-                2: { cellWidth: 35 }, // Autor
-                3: { cellWidth: 30 }, // Género
-                4: { cellWidth: 22 }, // Estado
-                5: { cellWidth: 22 }  // Alquileres
-            }
-        });
+    // Generar la tabla en el PDF usando autotable
+    doc.autoTable({
+      startY: 32,
+      head: cabeceras,
+      body: filas,
+      theme: "grid",
+      headStyles: {
+        fillColor: [197, 168, 128], // Color dorado #c5a880
+        textColor: [10, 13, 12], // Oscuro #0a0d0c
+        fontStyle: "bold",
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      columnStyles: {
+        0: { cellWidth: 35 }, // ISBN
+        1: { cellWidth: 45 }, // Título
+        2: { cellWidth: 35 }, // Autor
+        3: { cellWidth: 30 }, // Género
+        4: { cellWidth: 22 }, // Estado
+        5: { cellWidth: 22 }, // Alquileres
+      },
+    });
 
-        // Guardar PDF
-        doc.save("biblioteca_digital_libros.pdf");
-        mostrarToast("Colección exportada a PDF correctamente.", "success");
-    } catch (error) {
-        console.error("Error al exportar a PDF:", error);
-        mostrarToast("No se pudo generar el archivo PDF.", "error");
-    }
+    // Guardar PDF
+    doc.save("biblioteca_digital_libros.pdf");
+    mostrarToast("Colección exportada a PDF correctamente.", "success");
+  } catch (error) {
+    console.error("Error al exportar a PDF:", error);
+    mostrarToast("No se pudo generar el archivo PDF.", "error");
+  }
 }
 
 /**
  * Exporta la lista de libros actual en formato Excel (.xlsx) utilizando SheetJS (XLSX).
  */
 function exportarExcel() {
-    if (libros.length === 0) {
-        mostrarToast("No hay libros en la colección para exportar.", "error");
-        return;
-    }
+  if (libros.length === 0) {
+    mostrarToast("No hay libros en la colección para exportar.", "error");
+    return;
+  }
 
-    try {
-        // Formatear los datos para SheetJS
-        const datos = libros.map(libro => ({
-            "ISBN": libro.isbn || "—",
-            "Título": libro.titulo,
-            "Autor": libro.autor,
-            "Género": libro.genero,
-            "Estado": libro.isDisponible ? "Disponible" : "Prestado",
-            "Alquileres": libro.alquiladoCount || 0
-        }));
+  try {
+    // Formatear los datos para SheetJS
+    const datos = libros.map((libro) => ({
+      ISBN: libro.isbn || "—",
+      Título: libro.titulo,
+      Autor: libro.autor,
+      Género: libro.genero,
+      Estado: libro.isDisponible ? "Disponible" : "Prestado",
+      Alquileres: libro.alquiladoCount || 0,
+    }));
 
-        // Crear una nueva hoja de cálculo
-        const hoja = XLSX.utils.json_to_sheet(datos);
+    // Crear una nueva hoja de cálculo
+    const hoja = XLSX.utils.json_to_sheet(datos);
 
-        // Ajustar el ancho de las columnas de forma automática
-        const anchosColumnas = [
-            { wch: 20 }, // ISBN
-            { wch: 35 }, // Título
-            { wch: 25 }, // Autor
-            { wch: 20 }, // Género
-            { wch: 15 }, // Estado
-            { wch: 12 }  // Alquileres
-        ];
-        hoja['!cols'] = anchosColumnas;
+    // Ajustar el ancho de las columnas de forma automática
+    const anchosColumnas = [
+      { wch: 20 }, // ISBN
+      { wch: 35 }, // Título
+      { wch: 25 }, // Autor
+      { wch: 20 }, // Género
+      { wch: 15 }, // Estado
+      { wch: 12 }, // Alquileres
+    ];
+    hoja["!cols"] = anchosColumnas;
 
-        // Crear un libro de trabajo nuevo
-        const libroTrabajo = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(libroTrabajo, hoja, "Libros");
+    // Crear un libro de trabajo nuevo
+    const libroTrabajo = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libroTrabajo, hoja, "Libros");
 
-        // Escribir y descargar el archivo
-        XLSX.writeFile(libroTrabajo, "biblioteca_digital_libros.xlsx");
+    // Escribir y descargar el archivo
+    XLSX.writeFile(libroTrabajo, "biblioteca_digital_libros.xlsx");
 
-        mostrarToast("Colección exportada a Excel correctamente.", "success");
-    } catch (error) {
-        console.error("Error al exportar a Excel:", error);
-        mostrarToast("No se pudo generar el archivo de Excel.", "error");
-    }
+    mostrarToast("Colección exportada a Excel correctamente.", "success");
+  } catch (error) {
+    console.error("Error al exportar a Excel:", error);
+    mostrarToast("No se pudo generar el archivo de Excel.", "error");
+  }
 }
 
 /**
  * Abre un lector de archivos para importar una lista de libros desde un archivo JSON.
  */
 function importarLibros() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.click();
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.click();
 
-    input.addEventListener("change", (event) => {
-        const archivo = event.target.files[0];
-        if (archivo) {
-            const lector = new FileReader();
-            lector.onload = () => {
-                try {
-                    const datosImportados = JSON.parse(lector.result);
-                    if (Array.isArray(datosImportados)) {
-                        // Normalizar libros importados sin ISBN
-                        libros = datosImportados.map((libro, index) => {
-                            if (!libro.isbn) {
-                                libro.isbn = `IMP-${Date.now()}-${index}`;
-                            }
-                            if (libro.alquiladoCount === undefined) {
-                                libro.alquiladoCount = 0;
-                            }
-                            return libro;
-                        });
-                        guardarLibrosLocalStorage();
-                        filtrarYMostrarLibros();
-                        mostrarToast("Libros importados correctamente.", "success");
-                    } else {
-                        mostrarToast("El archivo importado debe contener una lista válida de libros.", "error");
-                    }
-                } catch (error) {
-                    console.error("Error al parsear el archivo importado:", error);
-                    mostrarToast("El archivo no tiene un formato JSON válido.", "error");
-                }
-            };
-            lector.readAsText(archivo);
+  input.addEventListener("change", (event) => {
+    const archivo = event.target.files[0];
+    if (archivo) {
+      const lector = new FileReader();
+      lector.onload = () => {
+        try {
+          const datosImportados = JSON.parse(lector.result);
+          if (Array.isArray(datosImportados)) {
+            // Normalizar libros importados sin ISBN
+            libros = datosImportados.map((libro, index) => {
+              if (!libro.isbn) {
+                libro.isbn = `IMP-${Date.now()}-${index}`;
+              }
+              if (libro.alquiladoCount === undefined) {
+                libro.alquiladoCount = 0;
+              }
+              return libro;
+            });
+            guardarLibrosLocalStorage();
+            filtrarYMostrarLibros();
+            mostrarToast("Libros importados correctamente.", "success");
+          } else {
+            mostrarToast(
+              "El archivo importado debe contener una lista válida de libros.",
+              "error",
+            );
+          }
+        } catch (error) {
+          console.error("Error al parsear el archivo importado:", error);
+          mostrarToast("El archivo no tiene un formato JSON válido.", "error");
         }
-    });
+      };
+      lector.readAsText(archivo);
+    }
+  });
 }
 
 /**
  * Actualiza y renderiza la sección del Top 3 de libros más prestados.
  */
 function actualizarTopLibros() {
-    const topListaContenedor = document.getElementById("topLibrosLista");
-    if (!topListaContenedor) return;
+  const topListaContenedor = document.getElementById("topLibrosLista");
+  if (!topListaContenedor) return;
 
-    topListaContenedor.innerHTML = "";
+  topListaContenedor.innerHTML = "";
 
-    // Filtrar libros que se hayan alquilado al menos una vez
-    const librosConAlquileres = libros.filter(libro => (libro.alquiladoCount || 0) > 0);
+  // Filtrar libros que se hayan alquilado al menos una vez
+  const librosConAlquileres = libros.filter(
+    (libro) => (libro.alquiladoCount || 0) > 0,
+  );
 
-    if (librosConAlquileres.length === 0) {
-        topListaContenedor.innerHTML = `
+  if (librosConAlquileres.length === 0) {
+    topListaContenedor.innerHTML = `
             <div class="top-libros-vacio">
                 Aún no hay préstamos registrados. ¡Presta algún libro de la lista para iniciar el ranking!
             </div>
         `;
-        return;
-    }
+    return;
+  }
 
-    // Ordenar de mayor a menor según el número de alquileres
-    const ranking = [...librosConAlquileres]
-        .sort((a, b) => b.alquiladoCount - a.alquiladoCount)
-        .slice(0, 3);
+  // Ordenar de mayor a menor según el número de alquileres
+  const ranking = [...librosConAlquileres]
+    .sort((a, b) => b.alquiladoCount - a.alquiladoCount)
+    .slice(0, 3);
 
-    ranking.forEach((libro, index) => {
-        const item = document.createElement("div");
-        item.classList.add("top-libro-item");
+  ranking.forEach((libro, index) => {
+    const item = document.createElement("div");
+    item.classList.add("top-libro-item");
 
-        const rankClass = `top-libro-rank--${index + 1}`;
-        
-        item.innerHTML = `
+    const rankClass = `top-libro-rank--${index + 1}`;
+
+    item.innerHTML = `
             <div class="top-libro-rank ${rankClass}">${index + 1}</div>
             <div class="top-libro-info">
                 <div class="top-libro-titulo" title="${libro.titulo}">${libro.titulo}</div>
                 <div class="top-libro-autor" title="${libro.autor}">${libro.autor}</div>
             </div>
             <div class="top-libro-count">
-                ${libro.alquiladoCount} ${libro.alquiladoCount === 1 ? 'préstamo' : 'préstamos'}
+                ${libro.alquiladoCount} ${libro.alquiladoCount === 1 ? "préstamo" : "préstamos"}
             </div>
         `;
 
-        topListaContenedor.appendChild(item);
-    });
+    topListaContenedor.appendChild(item);
+  });
 }
 
 /**
@@ -770,70 +801,70 @@ function actualizarTopLibros() {
  * @param {Event} event - Evento de cambio del input file.
  */
 function procesarImagenPortada(event) {
-    const archivo = event.target.files[0];
-    if (!archivo) return;
+  const archivo = event.target.files[0];
+  if (!archivo) return;
 
-    // Validar tipo de archivo
-    if (!archivo.type.startsWith("image/")) {
-        mostrarToast("Por favor, seleccione un archivo de imagen válido.", "error");
-        inputPortada.value = "";
-        return;
-    }
+  // Validar tipo de archivo
+  if (!archivo.type.startsWith("image/")) {
+    mostrarToast("Por favor, seleccione un archivo de imagen válido.", "error");
+    inputPortada.value = "";
+    return;
+  }
 
-    const lector = new FileReader();
-    lector.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-            // Dimensiones objetivo para la portada (miniatura premium)
-            const anchoMax = 120;
-            const altoMax = 180;
-            
-            let ancho = img.width;
-            let alto = img.height;
-            
-            // Mantener la relación de aspecto
-            if (ancho > alto) {
-                if (ancho > anchoMax) {
-                    alto = Math.round((alto * anchoMax) / ancho);
-                    ancho = anchoMax;
-                }
-            } else {
-                if (alto > altoMax) {
-                    ancho = Math.round((ancho * altoMax) / alto);
-                    alto = altoMax;
-                }
-            }
+  const lector = new FileReader();
+  lector.onload = function (e) {
+    const img = new Image();
+    img.onload = function () {
+      // Dimensiones objetivo para la portada (miniatura premium)
+      const anchoMax = 120;
+      const altoMax = 180;
 
-            // Crear un canvas invisible para redimensionar y comprimir
-            const canvas = document.createElement("canvas");
-            canvas.width = ancho;
-            canvas.height = alto;
-            
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, ancho, alto);
-            
-            // Obtener la imagen comprimida en JPEG (calidad 70% para ahorrar mucho espacio)
-            portadaBase64 = canvas.toDataURL("image/jpeg", 0.7);
-            
-            // Actualizar vista previa
-            previewImg.src = portadaBase64;
-            previewContainer.classList.remove("oculto");
-            labelPortada.classList.add("oculto");
-        };
-        img.src = e.target.result;
+      let ancho = img.width;
+      let alto = img.height;
+
+      // Mantener la relación de aspecto
+      if (ancho > alto) {
+        if (ancho > anchoMax) {
+          alto = Math.round((alto * anchoMax) / ancho);
+          ancho = anchoMax;
+        }
+      } else {
+        if (alto > altoMax) {
+          ancho = Math.round((ancho * altoMax) / alto);
+          alto = altoMax;
+        }
+      }
+
+      // Crear un canvas invisible para redimensionar y comprimir
+      const canvas = document.createElement("canvas");
+      canvas.width = ancho;
+      canvas.height = alto;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, ancho, alto);
+
+      // Obtener la imagen comprimida en JPEG (calidad 70% para ahorrar mucho espacio)
+      portadaBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+      // Actualizar vista previa
+      previewImg.src = portadaBase64;
+      previewContainer.classList.remove("oculto");
+      labelPortada.classList.add("oculto");
     };
-    lector.readAsDataURL(archivo);
+    img.src = e.target.result;
+  };
+  lector.readAsDataURL(archivo);
 }
 
 /**
  * Elimina la portada seleccionada del formulario actual.
  */
 function eliminarPortadaSeleccionada() {
-    inputPortada.value = "";
-    portadaBase64 = "";
-    previewImg.src = "";
-    previewContainer.classList.add("oculto");
-    labelPortada.classList.remove("oculto");
+  inputPortada.value = "";
+  portadaBase64 = "";
+  previewImg.src = "";
+  previewContainer.classList.add("oculto");
+  labelPortada.classList.remove("oculto");
 }
 
 /**
@@ -841,11 +872,11 @@ function eliminarPortadaSeleccionada() {
  * @param {MouseEvent} event - Evento mouseover de la tabla.
  */
 function mostrarHoverPortada(event) {
-    const targetImg = event.target.closest(".tabla-portada");
-    if (targetImg) {
-        hoverPreviewImg.src = targetImg.src;
-        hoverPreview.classList.add("mostrar");
-    }
+  const targetImg = event.target.closest(".tabla-portada");
+  if (targetImg) {
+    hoverPreviewImg.src = targetImg.src;
+    hoverPreview.classList.add("mostrar");
+  }
 }
 
 /**
@@ -854,28 +885,28 @@ function mostrarHoverPortada(event) {
  * @param {MouseEvent} event - Evento mousemove de la tabla.
  */
 function moverHoverPortada(event) {
-    const targetImg = event.target.closest(".tabla-portada");
-    if (targetImg && hoverPreview.classList.contains("mostrar")) {
-        const offset = 15; // Distancia del cursor
-        let x = event.clientX + offset;
-        let y = event.clientY + offset;
+  const targetImg = event.target.closest(".tabla-portada");
+  if (targetImg && hoverPreview.classList.contains("mostrar")) {
+    const offset = 15; // Distancia del cursor
+    let x = event.clientX + offset;
+    let y = event.clientY + offset;
 
-        const previewAncho = 160;
-        const previewAlto = 240;
+    const previewAncho = 160;
+    const previewAlto = 240;
 
-        // Comprobación de límites horizontales
-        if (x + previewAncho > window.innerWidth) {
-            x = event.clientX - previewAncho - offset;
-        }
-
-        // Comprobación de límites verticales
-        if (y + previewAlto > window.innerHeight) {
-            y = event.clientY - previewAlto - offset;
-        }
-
-        hoverPreview.style.left = `${x}px`;
-        hoverPreview.style.top = `${y}px`;
+    // Comprobación de límites horizontales
+    if (x + previewAncho > window.innerWidth) {
+      x = event.clientX - previewAncho - offset;
     }
+
+    // Comprobación de límites verticales
+    if (y + previewAlto > window.innerHeight) {
+      y = event.clientY - previewAlto - offset;
+    }
+
+    hoverPreview.style.left = `${x}px`;
+    hoverPreview.style.top = `${y}px`;
+  }
 }
 
 /**
@@ -883,13 +914,46 @@ function moverHoverPortada(event) {
  * @param {MouseEvent} event - Evento mouseout de la tabla.
  */
 function ocultarHoverPortada(event) {
-    const targetImg = event.target.closest(".tabla-portada");
-    if (targetImg) {
-        hoverPreview.classList.remove("mostrar");
-        hoverPreviewImg.src = "";
-    }
+  const targetImg = event.target.closest(".tabla-portada");
+  if (targetImg) {
+    hoverPreview.classList.remove("mostrar");
+    hoverPreviewImg.src = "";
+  }
 }
 
 // Inicialización de la aplicación al cargar la página
-cargarLibrosLocalStorage();
-filtrarYMostrarLibros();
+// cargarLibrosLocalStorage();
+// filtrarYMostrarLibros();
+
+// Capturar parámetros de la URL para mostrar notificaciones Toasts basadas en el backend
+const urlParams = new URLSearchParams(window.location.search);
+const status = urlParams.get('status');
+const msg = urlParams.get('msg');
+
+if (status === 'success') {
+  mostrarToast("¡Libro añadido correctamente a la base de datos!", "success");
+} else if (status === 'success_update') {
+  mostrarToast("¡Libro modificado correctamente en la base de datos!", "success");
+} else if (status === 'success_delete') {
+  mostrarToast("¡Libro eliminado correctamente de la base de datos!", "success");
+} else if (status === 'success_prestamo') {
+  mostrarToast("¡El libro ha sido prestado correctamente!", "success");
+} else if (status === 'success_devolucion') {
+  mostrarToast("¡El libro ha sido devuelto correctamente!", "success");
+} else if (status === 'error_prestamo') {
+  mostrarToast("Error: No se pudo actualizar el préstamo del libro.", "error");
+} else if (status === 'error') {
+  if (msg === 'isbn_duplicado') {
+    mostrarToast("Error: Ya existe un libro con ese ISBN en la colección.", "error");
+  } else if (msg === 'datos_incompletos') {
+    mostrarToast("Error: Los datos del formulario son incompletos.", "error");
+  } else {
+    mostrarToast("Ocurrió un error al interactuar con la base de datos.", "error");
+  }
+}
+
+// Limpiar la URL de parámetros para que no se repita el Toast al refrescar
+if (status) {
+  const nuevaUrl = window.location.pathname;
+  window.history.replaceState({}, document.title, nuevaUrl);
+}

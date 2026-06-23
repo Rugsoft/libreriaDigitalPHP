@@ -1,17 +1,33 @@
+<?php
+require_once __DIR__ . '/conexionDB.php';
+
+// Consulta para obtener el total, disponibles y prestados en una sola llamada
+$statsQuery = "SELECT COUNT(*) as total, SUM(CASE WHEN Disponible = 1 THEN 1 ELSE 0 END) as disponibles, SUM(CASE WHEN Disponible = 0 THEN 1 ELSE 0 END) as prestados FROM libros";
+$statsResult = mysqli_query($conn, $statsQuery);
+$total = 0;
+$disponibles = 0;
+$prestados = 0;
+
+if ($statsResult && $row = mysqli_fetch_assoc($statsResult)) {
+    $total = intval($row['total']);
+    $disponibles = intval($row['disponibles'] ?? 0);
+    $prestados = intval($row['prestados'] ?? 0);
+}
+?>
         <section class="contenedor__listado">
             <h2 class="contenedor__listado-titulo">Listado de libros</h2>
             
             <div class="contenedor__listado-stats">
                 <div class="stat-card">
-                    <span class="stat-card__numero" id="totalLibros">0</span>
+                    <span class="stat-card__numero" id="totalLibros"><?php echo $total; ?></span>
                     <span class="stat-card__etiqueta">Total Libros</span>
                 </div>
                 <div class="stat-card stat-card--disponible">
-                    <span class="stat-card__numero" id="registrosDisponibles">0</span>
+                    <span class="stat-card__numero" id="registrosDisponibles"><?php echo $disponibles; ?></span>
                     <span class="stat-card__etiqueta">Disponibles</span>
                 </div>
                 <div class="stat-card stat-card--prestado">
-                    <span class="stat-card__numero" id="registrosNoDisponibles">0</span>
+                    <span class="stat-card__numero" id="registrosNoDisponibles"><?php echo $prestados; ?></span>
                     <span class="stat-card__etiqueta">Prestados</span>
                 </div>
             </div>
@@ -23,10 +39,13 @@
                     </svg>
                     <input type="text" id="buscar" placeholder="Buscar por título, autor, género o ISBN...">
                 </div>
+                <?php
+                $estadoSelected = isset($_GET['estado']) ? $_GET['estado'] : 'todos';
+                ?>
                 <select name="estadoLibros" id="estadoLibros">
-                    <option value="todos">Todos los libros</option>
-                    <option value="disponibles">Disponibles</option>
-                    <option value="noDisponibles">Prestados</option>
+                    <option value="todos" <?php echo $estadoSelected === 'todos' ? 'selected' : ''; ?>>Todos los libros</option>
+                    <option value="disponibles" <?php echo $estadoSelected === 'disponibles' ? 'selected' : ''; ?>>Disponibles</option>
+                    <option value="noDisponibles" <?php echo $estadoSelected === 'noDisponibles' ? 'selected' : ''; ?>>Prestados</option>
                 </select>
             </div>
 
@@ -39,11 +58,18 @@
                             <th>Título</th>
                             <th>Autor</th>
                             <th>Género</th>
+                            <th>Año</th>
+                            <th>Páginas</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaLibros">
+                        <?php
+                        require_once __DIR__ . '/conexionDB.php';
+                        require_once __DIR__ . '/cargarLibros.php';
+                        mostrarLibros($conn);
+                        ?>
                     </tbody>
                 </table>
             </div>
