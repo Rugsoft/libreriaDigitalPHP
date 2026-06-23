@@ -1,7 +1,7 @@
         <section class="contenedor__añadir">
             <h2 class="contenedor__añadir-titulo">Añadir Libros a la colección</h2>
 
-            <form id="formularioAñadir">
+            <form action="procesarAñadirLibro.php" method="POST" id="formularioAñadir">
                 <label for="titulo">Título del libro</label>
                 <input type="text" id="titulo" placeholder="Introduzca el título" required>
 
@@ -10,6 +10,12 @@
 
                 <label for="genero">Género del libro</label>
                 <input type="text" id="genero" placeholder="Introduzca el género" required>
+
+                <label for="año">Año de publicación</label>
+                <input type="number" id="año" placeholder="Introduzca el año de publicación" required>
+        
+                <label for="paginas">Número de páginas</label>
+                <input type="number" id="paginas" placeholder="Introduzca el número de páginas" required>
 
                 <label for="ISBN">ISBN</label>
                 <input type="text" id="ISBN" placeholder="Introduzca el ISBN" required>

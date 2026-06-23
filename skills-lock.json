@@ -19,6 +19,12 @@
       "skillPath": "SKILL.md",
       "computedHash": "3545d1938bc805119fd31618cb1bc617081b3b0eb4f600e306a7c011438fd73b"
     },
+    "php-best-practices": {
+      "source": "asyrafhussin/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/php-best-practices/SKILL.md",
+      "computedHash": "4ec7edc12bdbaefe464715d0eedc14678696df4ae28d1cd32237827c735dd69c"
+    },
     "review-and-refactor": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
